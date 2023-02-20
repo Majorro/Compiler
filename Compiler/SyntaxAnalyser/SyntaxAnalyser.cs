@@ -6,7 +6,7 @@ namespace Compiler.SyntaxAnalyser;
 public static class SyntaxAnalyser
 {
     // https://regex101.com/
-    private static readonly Regex Numbers = new(@"[-]?(\d+\.?\d*|\d*\.\d+)");
+    private static readonly Regex Numbers = new(@"^[-]?(\d+\.?\d*|\d*\.\d+)");
     private static readonly Regex Letters = new(@"[_a-zA-Z]");
     private static readonly Regex Identifiers = new(@"^[_a-zA-Z]+[_a-zA-Z1-9]*");
     private static readonly Regex Strings = new("\"[^\"]*\"");
@@ -22,13 +22,19 @@ public static class SyntaxAnalyser
 
         foreach (var symbol in text + ' ')
         {
-            var type = CheckForType(buffer);
+            var preset = CheckForEnum(buffer);
 
-            if (type != TokenCONST.TkUnknown && !char.IsLetter(symbol))
+            if (Enum.IsDefined(typeof(TypeTokens), (int)preset) && !char.IsLetter(symbol))
             {
-                tokens.Add(new KeywordTk<TypeTokens> { TokenId = type });
+                tokens.Add(new EnumeratedTk<TypeTokens>(preset));
                 buffer = "";
             }
+            else if (Enum.IsDefined(typeof(KeywordTokens), (int)preset) && !char.IsLetter(symbol))
+            {
+                tokens.Add(new EnumeratedTk<KeywordTokens>(preset));
+                buffer = "";
+            }
+
             // Makes Const tokens of types integer and real
             else if (Numbers.IsMatch(buffer) && !(char.IsNumber(symbol) || symbol == '.'))
             {
@@ -58,10 +64,12 @@ public static class SyntaxAnalyser
                 tokens.Add(new IdentifierTk(buffer));
                 buffer = "";
             }
-            else if (buffer == " ")
+            // TODO: might me dangerous, shall we replace with buffer == " " ?
+            else if (buffer.Contains(" "))
             {
                 buffer = "";
             }
+
 
             buffer += symbol;
         }
@@ -69,15 +77,59 @@ public static class SyntaxAnalyser
         return tokens;
     }
 
-    private static TokenCONST CheckForType(string inputWord)
+    private static TokenCONST CheckForEnum(string inputWord)
     {
         switch (inputWord)
         {
+            //Types:
             case "int": return TokenCONST.TkInt;
             case "float": return TokenCONST.TkReal;
             case "char": return TokenCONST.TkChar;
             case "string": return TokenCONST.TkString;
+
+            //KeyWords:
+            case "type": return TokenCONST.TkType;
+            case "is": return TokenCONST.TkIs;
+            case "end": return TokenCONST.TkEnd;
+            case "return": return TokenCONST.TkReturn;
+            case "var": return TokenCONST.TkVar;
+            case "routine": return TokenCONST.TkRoutine;
+            case "record": return TokenCONST.TkRecord;
+            case "array": return TokenCONST.TkArray;
+            case "for": return TokenCONST.TkFor;
+            case "while": return TokenCONST.TkWhile;
+            case "loop": return TokenCONST.TkLoop;
+            case "in": return TokenCONST.TkIn;
+            case "reverse": return TokenCONST.TkReverse;
+            case "if": return TokenCONST.TkIf;
+            case "then": return TokenCONST.TkThen;
+            case "else": return TokenCONST.TkElse;
+
             default: return TokenCONST.TkUnknown;
         }
     }
+
+    // private static TokenCONST CheckForKeyWord(string inputWord)
+    // {
+    //     switch (inputWord)
+    //     {
+    //         case "type": return TokenCONST.TkType;
+    //         case "is": return TokenCONST.TkIs;
+    //         case "end": return TokenCONST.TkEnd;
+    //         case "return": return TokenCONST.TkReturn;
+    //         case "var": return TokenCONST.TkVar;
+    //         case "routine": return TokenCONST.TkRoutine;
+    //         case "record": return TokenCONST.TkRecord;
+    //         case "array": return TokenCONST.TkArray;
+    //         case "for": return TokenCONST.TkFor;
+    //         case "while": return TokenCONST.TkWhile;
+    //         case "loop": return TokenCONST.TkLoop;
+    //         case "in": return TokenCONST.TkIn;
+    //         case "reverse": return TokenCONST.TkReverse;
+    //         case "if": return TokenCONST.TkIf;
+    //         case "then": return TokenCONST.TkThen;
+    //         case "else": return TokenCONST.TkElse;
+    //         default: return TokenCONST.TkUnknown;
+    //     }
+    // }
 }

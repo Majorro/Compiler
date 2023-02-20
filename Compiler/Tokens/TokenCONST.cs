@@ -3,11 +3,32 @@
 public enum TokenCONST
 {
     TkUnknown,
+
     TkBool,
     TkInt,
     TkReal,
     TkChar,
-    TkString
+    TkString,
+
+    TkType,
+    TkIs,
+    TkEnd,
+    TkReturn,
+    TkVar,
+    TkRoutine,
+    TkRecord,
+    TkArray,
+    TkFor,
+    TkWhile,
+    TkLoop,
+    TkIn,
+    TkReverse,
+    TkIf,
+    TkThen,
+    TkElse,
+
+
+    TkIdentifier
 }
 
 public enum TypeTokens
@@ -29,10 +50,22 @@ public enum PunctuatorTokens
 
 public enum KeywordTokens
 {
-    tkInt = TokenCONST.TkInt,
-    tkFloat = TokenCONST.TkReal,
-    tkChar = TokenCONST.TkChar,
-    tkString = TokenCONST.TkString
+    TkType = TokenCONST.TkType,
+    TkIs = TokenCONST.TkIs,
+    TkEnd = TokenCONST.TkEnd,
+    TkReturn = TokenCONST.TkReturn,
+    TkVar = TokenCONST.TkVar,
+    TkRoutine = TokenCONST.TkRoutine,
+    TkRecord = TokenCONST.TkRecord,
+    TkArray = TokenCONST.TkArray,
+    TkFor = TokenCONST.TkFor,
+    TkWhile = TokenCONST.TkWhile,
+    TkLoop = TokenCONST.TkLoop,
+    TkIn = TokenCONST.TkIn,
+    TkReverse = TokenCONST.TkReverse,
+    TkIf = TokenCONST.TkIf,
+    TkThen = TokenCONST.TkThen,
+    TkElse = TokenCONST.TkElse
 }
 
 public enum OperatorTokens

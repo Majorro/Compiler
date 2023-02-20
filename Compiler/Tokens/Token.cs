@@ -4,7 +4,7 @@ public abstract class Token
 {
     protected int _tokenId;
     public Span span;
-    public TokenCONST TokenId { get; set; }
+    public abstract TokenCONST TokenId { get; }
 }
 
 #region Identidier Token
@@ -17,6 +17,8 @@ public class IdentifierTk : Token
     {
         this.value = value;
     }
+
+    public override TokenCONST TokenId => TokenCONST.TkIdentifier;
 }
 
 #endregion
@@ -27,21 +29,20 @@ public class IdentifierTk : Token
 ///     This generic class is recommended to use for Keyword, Type, Operator, and Punctuator tokes
 /// </summary>
 /// <typeparam name="T"></typeparam>
-public class KeywordTk<T> : Token where T : Enum
+public class EnumeratedTk<T> : Token where T : Enum
 {
-    public new TokenCONST TokenId
+    public EnumeratedTk(TokenCONST value)
     {
-        get => (TokenCONST)_tokenId;
-        set
-        {
-            if (Enum.IsDefined(typeof(T), (int)value)) _tokenId = (int)value;
-        }
+        if (Enum.IsDefined(typeof(T), (int)value)) _tokenId = (int)value;
+        else throw new ArgumentOutOfRangeException($"Enum {typeof(T)} desn't have value {value}");
     }
+
+    public override TokenCONST TokenId => (TokenCONST)_tokenId;
 }
 
 // public class OperatorTk : Token
 // {
-//     public new int TokenId
+//     public  int TokenId
 //     {
 //         get { return _tokenId; }
 //         set
@@ -56,7 +57,7 @@ public class KeywordTk<T> : Token where T : Enum
 //
 // public class PunctuatorTk : Token
 // {
-//     public new int TokenId
+//     public  int TokenId
 //     {
 //         get { return _tokenId; }
 //         set
@@ -71,7 +72,7 @@ public class KeywordTk<T> : Token where T : Enum
 //
 // public class TypeTk : Token
 // {
-//     public new int TokenId
+//     public  int TokenId
 //     {
 //         get { return _tokenId; }
 //         set
@@ -97,7 +98,7 @@ public class IntTk : Token
         this.value = value;
     }
 
-    public new TokenCONST TokenId => TokenCONST.TkInt;
+    public override TokenCONST TokenId => TokenCONST.TkInt;
 }
 
 public class RealTk : Token
@@ -109,13 +110,13 @@ public class RealTk : Token
         this.value = value;
     }
 
-    public new TokenCONST TokenId => TokenCONST.TkReal;
+    public override TokenCONST TokenId => TokenCONST.TkReal;
 }
 
 public class BoolTk : Token
 {
     public bool value;
-    public new TokenCONST TokenId => TokenCONST.TkBool;
+    public override TokenCONST TokenId => TokenCONST.TkBool;
 }
 
 #endregion
@@ -130,6 +131,8 @@ public class CharTk : Token
     {
         this.value = value;
     }
+
+    public override TokenCONST TokenId => TokenCONST.TkChar;
 }
 
 public class StringTk : Token
@@ -140,6 +143,8 @@ public class StringTk : Token
     {
         this.value = value;
     }
+
+    public override TokenCONST TokenId => TokenCONST.TkString;
 }
 
 #endregion
