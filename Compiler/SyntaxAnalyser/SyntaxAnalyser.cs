@@ -1,7 +1,7 @@
-﻿using Compiler.Tokens;
-namespace Compiler.SyntaxAnalyser;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
+using Compiler.Tokens;
 
+namespace Compiler.SyntaxAnalyser;
 
 public static class SyntaxAnalyser
 {
@@ -17,31 +17,31 @@ public static class SyntaxAnalyser
 
     public static List<Token> FinalStateAutomata(string text)
     {
-        List<Token> tokens = new List<Token>(); 
-        string buffer = "";
-        
-        foreach (var symbol in text+' ')
+        var tokens = new List<Token>();
+        var buffer = "";
+
+        foreach (var symbol in text + ' ')
         {
             var type = CheckForType(buffer);
-            
-            if ( type != TokenCONST.tkUnknown && ! char.IsLetter(symbol))
+
+            if (type != TokenCONST.TkUnknown && !char.IsLetter(symbol))
             {
-                tokens.Add(new TypeTk(){TokenConst = type});
+                tokens.Add(new KeywordTk<TypeTokens> { TokenId = type });
                 buffer = "";
             }
-            else if (Numbers.IsMatch(buffer) && ! (char.IsNumber(symbol) || symbol == '.'))
+            // Makes Const tokens of types integer and real
+            else if (Numbers.IsMatch(buffer) && !(char.IsNumber(symbol) || symbol == '.'))
             {
-                if (Int64.TryParse(buffer, out long integer))
+                if (long.TryParse(buffer, out var integer))
                 {
                     tokens.Add(new IntTk(integer));
                     buffer = "";
                 }
-                else if (Double.TryParse(buffer, out double real))
+                else if (double.TryParse(buffer, out var real))
                 {
                     tokens.Add(new RealTk(real));
                     buffer = "";
                 }
-                
             }
             else if (Strings.IsMatch(buffer))
             {
@@ -53,7 +53,7 @@ public static class SyntaxAnalyser
                 tokens.Add(new CharTk(buffer[1]));
                 buffer = "";
             }
-            else if (Identifiers.IsMatch(buffer) && !(char.IsLetterOrDigit(symbol) || symbol == '_') )
+            else if (Identifiers.IsMatch(buffer) && !(char.IsLetterOrDigit(symbol) || symbol == '_'))
             {
                 tokens.Add(new IdentifierTk(buffer));
                 buffer = "";
@@ -73,12 +73,11 @@ public static class SyntaxAnalyser
     {
         switch (inputWord)
         {
-            case "int": return TokenCONST.tkInt;
-            case "float": return TokenCONST.tkFloat;
-            case "char": return TokenCONST.tkChar;
-            case "string": return TokenCONST.tkString;
-            default: return TokenCONST.tkUnknown;
+            case "int": return TokenCONST.TkInt;
+            case "float": return TokenCONST.TkReal;
+            case "char": return TokenCONST.TkChar;
+            case "string": return TokenCONST.TkString;
+            default: return TokenCONST.TkUnknown;
         }
     }
 }
-
