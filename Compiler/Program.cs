@@ -3,19 +3,18 @@
 using Compiler.SyntaxAnalyser;
 using Newtonsoft.Json;
 
-var program = @"routine bubbleSort(array: integer[]): integer[] is
-   var size := array.Length;
-   var swapped := false;
-
-    for i in 0 .. (size - 1) loop is
-        for j in 0 .. (size - i - 1) loop is
-            if array[j] > array[j+1] then
-               var swapped := true;
-               var temp := array[j];
-                array[j] := array[j + 1];
-                array[j + 1] := temp;
-        if  swapped = false then
-            return array;";
+var program = @"routine gcd (a: integer, b: integer): integer is
+    if a > b then
+//some comment
+       var small := b;
+    else
+       var small := a;
+    end;
+    for i in 1 .. (small + 1) loop is
+        if (a % i = 0) and (b % i = 0) then
+          var ans := i;
+        end;
+    return ans;";
 
 // program = @"for i in 1 .. (small + 1) loop is";
 

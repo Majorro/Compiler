@@ -1,4 +1,5 @@
-﻿using Compiler.Tokens;
+﻿using System.Text.RegularExpressions;
+using Compiler.Tokens;
 
 namespace Compiler.SyntaxAnalyser;
 
@@ -16,7 +17,12 @@ public static class SyntaxAnalyser
             var preset = CheckForEnum(buffer);
             Token token = null;
 
-            if (preset != TokenCONST.TkUnknown)
+            if (TokenRegexes.Comments.IsMatch(buffer))
+            {
+                lineNumber += Regex.Matches(buffer, "\r").Count;
+                buffer = "";
+            }
+            else if (preset != TokenCONST.TkUnknown)
             {
                 if (Enum.IsDefined(typeof(TypeTokens), (int)preset) && !char.IsLetter(symbol))
                     token = new EnumeratedTk<TypeTokens>(preset);
@@ -24,7 +30,7 @@ public static class SyntaxAnalyser
                 else if (Enum.IsDefined(typeof(KeywordTokens), (int)preset) && !char.IsLetter(symbol))
                     token = new EnumeratedTk<KeywordTokens>(preset);
 
-                else if (TokenRegexes.Operators.IsMatch(buffer) && symbol != '.')
+                else if (TokenRegexes.Operators.IsMatch(buffer) && buffer + symbol is not (".." or "//" or "/*"))
                     token = new EnumeratedTk<OperatorTokens>(preset);
 
                 else if (TokenRegexes.Puncuators.IsMatch(buffer) &&
