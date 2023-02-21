@@ -2,7 +2,6 @@
 
 public abstract class Token
 {
-    protected int _tokenId;
     public Span span;
     public abstract TokenCONST TokenId { get; }
 }
@@ -23,7 +22,7 @@ public class IdentifierTk : Token
 
 #endregion
 
-#region Keyword Tokens
+#region Enumerated Tokens
 
 /// <summary>
 ///     This generic class is recommended to use for Keyword, Type, Operator, and Punctuator tokes
@@ -31,6 +30,8 @@ public class IdentifierTk : Token
 /// <typeparam name="T"></typeparam>
 public class EnumeratedTk<T> : Token where T : Enum
 {
+    private readonly int _tokenId;
+
     public EnumeratedTk(TokenCONST value)
     {
         if (Enum.IsDefined(typeof(T), (int)value)) _tokenId = (int)value;
@@ -39,51 +40,6 @@ public class EnumeratedTk<T> : Token where T : Enum
 
     public override TokenCONST TokenId => (TokenCONST)_tokenId;
 }
-
-// public class OperatorTk : Token
-// {
-//     public  int TokenId
-//     {
-//         get { return _tokenId; }
-//         set
-//         {
-//             if (Enum.IsDefined(typeof(OperatorTokens), value))
-//             {
-//                 _tokenId = value;
-//             }
-//         }
-//     }
-// }
-//
-// public class PunctuatorTk : Token
-// {
-//     public  int TokenId
-//     {
-//         get { return _tokenId; }
-//         set
-//         {
-//             if (Enum.IsDefined(typeof(PunctuatorTokens), value))
-//             {
-//                 _tokenId = value;
-//             }
-//         }
-//     }
-// }
-//
-// public class TypeTk : Token
-// {
-//     public  int TokenId
-//     {
-//         get { return _tokenId; }
-//         set
-//         {
-//             if (Enum.IsDefined(typeof(TypeTokens), value))
-//             {
-//                 _tokenId = value;
-//             }
-//         }
-//     }
-// }
 
 #endregion
 

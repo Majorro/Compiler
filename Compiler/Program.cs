@@ -3,7 +3,7 @@
 using Compiler.SyntaxAnalyser;
 using Newtonsoft.Json;
 
-var program = "int gagaD12 if 'f' else  4.20; for";
+var program = " 1 := or else";
 
 foreach (var tok in SyntaxAnalyser.FinalStateAutomata(program))
     Console.WriteLine($"{tok.TokenId} \t {JsonConvert.SerializeObject(tok)}");

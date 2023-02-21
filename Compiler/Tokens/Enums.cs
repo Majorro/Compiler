@@ -4,12 +4,14 @@ public enum TokenCONST
 {
     TkUnknown,
 
+//Types
     TkBool,
     TkInt,
     TkReal,
     TkChar,
     TkString,
 
+// Keywords
     TkType,
     TkIs,
     TkEnd,
@@ -27,6 +29,29 @@ public enum TokenCONST
     TkThen,
     TkElse,
 
+// Punctuators
+    TkRoundOpen,
+    TkRoundClose,
+    TkCurlyOpen,
+    TkCurlyClose,
+    TkSquareOpen,
+    TkSquareClose,
+    TkSemicolon,
+    TkColon,
+    TkDot,
+    TkComma,
+
+    // Operators:
+    TkAssign,
+    TkEqual,
+    TkMinus,
+    TkPlus,
+    TkMultiply,
+    TkDivide,
+    TkPercent,
+    TkAnd,
+    TkOr,
+    TkXor,
 
     TkIdentifier
 }
@@ -42,10 +67,16 @@ public enum TypeTokens
 
 public enum PunctuatorTokens
 {
-    tkInt = TokenCONST.TkInt,
-    tkFloat = TokenCONST.TkReal,
-    tkChar = TokenCONST.TkChar,
-    tkString = TokenCONST.TkString
+    TkRoundOpen = TokenCONST.TkRoundOpen,
+    TkRoundClose = TokenCONST.TkRoundClose,
+    TkCurlyOpen = TokenCONST.TkCurlyOpen,
+    TkCurlyClose = TokenCONST.TkCurlyClose,
+    TkSquareOpen = TokenCONST.TkSquareOpen,
+    TkSquareClose = TokenCONST.TkSquareClose,
+    TkSemicolon = TokenCONST.TkSemicolon,
+    TkColon = TokenCONST.TkColon,
+    TkDot = TokenCONST.TkDot,
+    TkComma = TokenCONST.TkComma
 }
 
 public enum KeywordTokens
@@ -70,8 +101,14 @@ public enum KeywordTokens
 
 public enum OperatorTokens
 {
-    tkInt = TokenCONST.TkInt,
-    tkFloat = TokenCONST.TkReal,
-    tkChar = TokenCONST.TkChar,
-    tkString = TokenCONST.TkString
+    TkAssign = TokenCONST.TkAssign,
+    TkEqual = TokenCONST.TkEqual,
+    TkMinus = TokenCONST.TkMinus,
+    TkPlus = TokenCONST.TkPlus,
+    TkMultiply = TokenCONST.TkMultiply,
+    TkDivide = TokenCONST.TkDivide,
+    TkPercent = TokenCONST.TkPercent,
+    TkAnd = TokenCONST.TkAnd,
+    TkOr = TokenCONST.TkOr,
+    TkXor = TokenCONST.TkXor
 }

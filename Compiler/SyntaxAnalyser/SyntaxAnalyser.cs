@@ -1,20 +1,9 @@
-﻿using System.Text.RegularExpressions;
-using Compiler.Tokens;
+﻿using Compiler.Tokens;
 
 namespace Compiler.SyntaxAnalyser;
 
 public static class SyntaxAnalyser
 {
-    // https://regex101.com/
-    private static readonly Regex Numbers = new(@"^[-]?(\d+\.?\d*|\d*\.\d+)");
-    private static readonly Regex Letters = new(@"[_a-zA-Z]");
-    private static readonly Regex Identifiers = new(@"^[_a-zA-Z]+[_a-zA-Z1-9]*");
-    private static readonly Regex Strings = new("\"[^\"]*\"");
-    private static readonly Regex Chars = new("'.'");
-    private static readonly Regex Comments = new(@"(\/\*[\S\s]*\*\/)|(\/\/.*)");
-    private static readonly Regex Whitespaces = new(@"\s");
-    private static readonly Regex Comparisons = new(@"<=|>=|<|>|==|!=");
-
     public static List<Token> FinalStateAutomata(string text)
     {
         var tokens = new List<Token>();
@@ -23,59 +12,59 @@ public static class SyntaxAnalyser
         foreach (var symbol in text + ' ')
         {
             var preset = CheckForEnum(buffer);
+            Token token = null;
 
-            if (Enum.IsDefined(typeof(TypeTokens), (int)preset) && !char.IsLetter(symbol))
+            if (preset != TokenCONST.TkUnknown)
             {
-                tokens.Add(new EnumeratedTk<TypeTokens>(preset));
-                buffer = "";
-            }
-            else if (Enum.IsDefined(typeof(KeywordTokens), (int)preset) && !char.IsLetter(symbol))
-            {
-                tokens.Add(new EnumeratedTk<KeywordTokens>(preset));
-                buffer = "";
-            }
+                if (Enum.IsDefined(typeof(TypeTokens), (int)preset) && !char.IsLetter(symbol))
+                    token = new EnumeratedTk<TypeTokens>(preset);
 
+                else if (Enum.IsDefined(typeof(KeywordTokens), (int)preset) && !char.IsLetter(symbol))
+                    token = new EnumeratedTk<KeywordTokens>(preset);
+
+                else if (TokenRegexes.Puncuators.IsMatch(buffer) && !TokenRegexes.Operators.IsMatch(symbol.ToString()))
+                    token = new EnumeratedTk<PunctuatorTokens>(preset);
+
+                else if (TokenRegexes.Operators.IsMatch(buffer))
+                    token = new EnumeratedTk<OperatorTokens>(preset);
+            }
             // Makes Const tokens of types integer and real
-            else if (Numbers.IsMatch(buffer) && !(char.IsNumber(symbol) || symbol == '.'))
+            else if (TokenRegexes.Numbers.IsMatch(buffer) && !(char.IsNumber(symbol) || symbol == '.'))
             {
-                if (long.TryParse(buffer, out var integer))
-                {
-                    tokens.Add(new IntTk(integer));
-                    buffer = "";
-                }
-                else if (double.TryParse(buffer, out var real))
-                {
-                    tokens.Add(new RealTk(real));
-                    buffer = "";
-                }
+                if (long.TryParse(buffer, out var integer)) token = new IntTk(integer);
+
+                else if (double.TryParse(buffer, out var real)) token = new RealTk(real);
             }
-            else if (Strings.IsMatch(buffer))
+            else if (TokenRegexes.Strings.IsMatch(buffer))
             {
-                tokens.Add(new StringTk(buffer.Split('"')[1]));
-                buffer = "";
+                token = new StringTk(buffer.Split('"')[1]);
             }
-            else if (Chars.IsMatch(buffer))
+            else if (TokenRegexes.Chars.IsMatch(buffer))
             {
-                tokens.Add(new CharTk(buffer[1]));
-                buffer = "";
+                token = new CharTk(buffer[1]);
             }
-            else if (Identifiers.IsMatch(buffer) && !(char.IsLetterOrDigit(symbol) || symbol == '_'))
+            else if (TokenRegexes.Identifiers.IsMatch(buffer) && !(char.IsLetterOrDigit(symbol) || symbol == '_'))
             {
-                tokens.Add(new IdentifierTk(buffer));
-                buffer = "";
+                token = new IdentifierTk(buffer);
             }
             // TODO: might me dangerous, shall we replace with buffer == " " ?
-            else if (buffer.Contains(" "))
+            else if (buffer.Contains(' '))
             {
                 buffer = "";
             }
 
+            if (token is not null)
+            {
+                tokens.Add(token);
+                buffer = "";
+            }
 
             buffer += symbol;
         }
 
         return tokens;
     }
+
 
     private static TokenCONST CheckForEnum(string inputWord)
     {
@@ -105,31 +94,31 @@ public static class SyntaxAnalyser
             case "then": return TokenCONST.TkThen;
             case "else": return TokenCONST.TkElse;
 
+            //Punctuators:
+            case "(": return TokenCONST.TkRoundOpen;
+            case ")": return TokenCONST.TkRoundClose;
+            case "{": return TokenCONST.TkCurlyOpen;
+            case "}": return TokenCONST.TkCurlyClose;
+            case "[": return TokenCONST.TkSquareOpen;
+            case "]": return TokenCONST.TkSquareClose;
+            case ";": return TokenCONST.TkSemicolon;
+            case ":": return TokenCONST.TkColon;
+            case ".": return TokenCONST.TkDot;
+            case ",": return TokenCONST.TkComma;
+
+            //Operators:
+            case ":=": return TokenCONST.TkAssign;
+            case "=": return TokenCONST.TkEqual;
+            case "-": return TokenCONST.TkMinus;
+            case "+": return TokenCONST.TkPlus;
+            case "*": return TokenCONST.TkMultiply;
+            case "/": return TokenCONST.TkDivide;
+            case "%": return TokenCONST.TkPercent;
+            case "and": return TokenCONST.TkAnd;
+            case "or": return TokenCONST.TkOr;
+            case "xor": return TokenCONST.TkXor;
+
             default: return TokenCONST.TkUnknown;
         }
     }
-
-    // private static TokenCONST CheckForKeyWord(string inputWord)
-    // {
-    //     switch (inputWord)
-    //     {
-    //         case "type": return TokenCONST.TkType;
-    //         case "is": return TokenCONST.TkIs;
-    //         case "end": return TokenCONST.TkEnd;
-    //         case "return": return TokenCONST.TkReturn;
-    //         case "var": return TokenCONST.TkVar;
-    //         case "routine": return TokenCONST.TkRoutine;
-    //         case "record": return TokenCONST.TkRecord;
-    //         case "array": return TokenCONST.TkArray;
-    //         case "for": return TokenCONST.TkFor;
-    //         case "while": return TokenCONST.TkWhile;
-    //         case "loop": return TokenCONST.TkLoop;
-    //         case "in": return TokenCONST.TkIn;
-    //         case "reverse": return TokenCONST.TkReverse;
-    //         case "if": return TokenCONST.TkIf;
-    //         case "then": return TokenCONST.TkThen;
-    //         case "else": return TokenCONST.TkElse;
-    //         default: return TokenCONST.TkUnknown;
-    //     }
-    // }
 }
