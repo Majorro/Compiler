@@ -38,12 +38,11 @@ public enum TokenCONST
     TkSquareClose,
     TkSemicolon,
     TkColon,
-    TkDot,
     TkComma,
 
     // Operators:
     TkAssign,
-    TkEqual,
+    TkDot,
     TkMinus,
     TkPlus,
     TkMultiply,
@@ -52,6 +51,15 @@ public enum TokenCONST
     TkAnd,
     TkOr,
     TkXor,
+    TkRange,
+
+    //Comparators:
+    TkLeq,
+    TkGeq,
+    TkLess,
+    TkGreater,
+    TkEqual,
+    TkNotEqual,
 
     TkIdentifier
 }
@@ -75,7 +83,6 @@ public enum PunctuatorTokens
     TkSquareClose = TokenCONST.TkSquareClose,
     TkSemicolon = TokenCONST.TkSemicolon,
     TkColon = TokenCONST.TkColon,
-    TkDot = TokenCONST.TkDot,
     TkComma = TokenCONST.TkComma
 }
 
@@ -102,7 +109,7 @@ public enum KeywordTokens
 public enum OperatorTokens
 {
     TkAssign = TokenCONST.TkAssign,
-    TkEqual = TokenCONST.TkEqual,
+    TkDot = TokenCONST.TkDot,
     TkMinus = TokenCONST.TkMinus,
     TkPlus = TokenCONST.TkPlus,
     TkMultiply = TokenCONST.TkMultiply,
@@ -110,5 +117,16 @@ public enum OperatorTokens
     TkPercent = TokenCONST.TkPercent,
     TkAnd = TokenCONST.TkAnd,
     TkOr = TokenCONST.TkOr,
-    TkXor = TokenCONST.TkXor
+    TkXor = TokenCONST.TkXor,
+    TkRange = TokenCONST.TkRange
+}
+
+internal enum Comparators
+{
+    TkLeq = TokenCONST.TkLeq,
+    TkGeq = TokenCONST.TkGeq,
+    TkLess = TokenCONST.TkLess,
+    TkGreater = TokenCONST.TkGreater,
+    TkEqual = TokenCONST.TkEqual,
+    TkNotEqual = TokenCONST.TkNotEqual
 }

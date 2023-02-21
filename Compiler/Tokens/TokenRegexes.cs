@@ -11,8 +11,8 @@ public static class TokenRegexes
     public static readonly Regex Strings = new("\"[^\"]*\"");
     public static readonly Regex Chars = new("'.'");
     public static readonly Regex Comments = new(@"(\/\*[\S\s]*\*\/)|(\/\/.*)");
-    public static readonly Regex Whitespaces = new(@"\s");
-    public static readonly Regex Comparisons = new(@"^(<=|>=|<|>|==|!=)$");
-    public static readonly Regex Puncuators = new(@"^[\(\)\{\}\[\]\;\:\.\,]$");
-    public static readonly Regex Operators = new(@"^(:=|=|-|\+|\*|\/|%)|((and|xor|or))$");
+    public static readonly Regex Whitespaces = new(@"^\s");
+    public static readonly Regex Comparators = new(@"^(<=|>=|<|>|=|/=)$");
+    public static readonly Regex Puncuators = new(@"^[\(\)\{\}\[\]\;\:\,]$");
+    public static readonly Regex Operators = new(@"^(:=|-|\+|\*|\/|%|\.\.|\.)|((and|xor|or))$");
 }

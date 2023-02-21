@@ -6,8 +6,6 @@ public abstract class Token
     public abstract TokenCONST TokenId { get; }
 }
 
-#region Identidier Token
-
 public class IdentifierTk : Token
 {
     public string value;
@@ -19,10 +17,6 @@ public class IdentifierTk : Token
 
     public override TokenCONST TokenId => TokenCONST.TkIdentifier;
 }
-
-#endregion
-
-#region Enumerated Tokens
 
 /// <summary>
 ///     This generic class is recommended to use for Keyword, Type, Operator, and Punctuator tokes
@@ -40,8 +34,6 @@ public class EnumeratedTk<T> : Token where T : Enum
 
     public override TokenCONST TokenId => (TokenCONST)_tokenId;
 }
-
-#endregion
 
 #region Constant Tokens
 
@@ -72,6 +64,12 @@ public class RealTk : Token
 public class BoolTk : Token
 {
     public bool value;
+
+    public BoolTk(bool value)
+    {
+        this.value = value;
+    }
+
     public override TokenCONST TokenId => TokenCONST.TkBool;
 }
 

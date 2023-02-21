@@ -22,11 +22,15 @@ public static class SyntaxAnalyser
                 else if (Enum.IsDefined(typeof(KeywordTokens), (int)preset) && !char.IsLetter(symbol))
                     token = new EnumeratedTk<KeywordTokens>(preset);
 
-                else if (TokenRegexes.Puncuators.IsMatch(buffer) && !TokenRegexes.Operators.IsMatch(symbol.ToString()))
+                else if (TokenRegexes.Operators.IsMatch(buffer) && symbol != '.')
+                    token = new EnumeratedTk<OperatorTokens>(preset);
+
+                else if (TokenRegexes.Puncuators.IsMatch(buffer) &&
+                         !TokenRegexes.Comparators.IsMatch(symbol.ToString()))
                     token = new EnumeratedTk<PunctuatorTokens>(preset);
 
-                else if (TokenRegexes.Operators.IsMatch(buffer))
-                    token = new EnumeratedTk<OperatorTokens>(preset);
+                else if (TokenRegexes.Comparators.IsMatch(buffer))
+                    token = new EnumeratedTk<Comparators>(preset);
             }
             // Makes Const tokens of types integer and real
             else if (TokenRegexes.Numbers.IsMatch(buffer) && !(char.IsNumber(symbol) || symbol == '.'))
@@ -34,6 +38,10 @@ public static class SyntaxAnalyser
                 if (long.TryParse(buffer, out var integer)) token = new IntTk(integer);
 
                 else if (double.TryParse(buffer, out var real)) token = new RealTk(real);
+            }
+            else if (bool.TryParse(buffer, out var boolean))
+            {
+                token = new BoolTk(boolean);
             }
             else if (TokenRegexes.Strings.IsMatch(buffer))
             {
@@ -47,8 +55,7 @@ public static class SyntaxAnalyser
             {
                 token = new IdentifierTk(buffer);
             }
-            // TODO: might me dangerous, shall we replace with buffer == " " ?
-            else if (buffer.Contains(' '))
+            else if (TokenRegexes.Whitespaces.IsMatch(buffer))
             {
                 buffer = "";
             }
@@ -71,7 +78,8 @@ public static class SyntaxAnalyser
         switch (inputWord)
         {
             //Types:
-            case "int": return TokenCONST.TkInt;
+            case "boolean": return TokenCONST.TkBool;
+            case "integer": return TokenCONST.TkInt;
             case "float": return TokenCONST.TkReal;
             case "char": return TokenCONST.TkChar;
             case "string": return TokenCONST.TkString;
@@ -103,12 +111,11 @@ public static class SyntaxAnalyser
             case "]": return TokenCONST.TkSquareClose;
             case ";": return TokenCONST.TkSemicolon;
             case ":": return TokenCONST.TkColon;
-            case ".": return TokenCONST.TkDot;
             case ",": return TokenCONST.TkComma;
 
             //Operators:
             case ":=": return TokenCONST.TkAssign;
-            case "=": return TokenCONST.TkEqual;
+            case ".": return TokenCONST.TkDot;
             case "-": return TokenCONST.TkMinus;
             case "+": return TokenCONST.TkPlus;
             case "*": return TokenCONST.TkMultiply;
@@ -117,6 +124,16 @@ public static class SyntaxAnalyser
             case "and": return TokenCONST.TkAnd;
             case "or": return TokenCONST.TkOr;
             case "xor": return TokenCONST.TkXor;
+            case "..": return TokenCONST.TkRange;
+
+            // Comparators:
+            case "<=": return TokenCONST.TkLeq;
+            case ">=": return TokenCONST.TkGeq;
+            case "<": return TokenCONST.TkLess;
+            case ">": return TokenCONST.TkGreater;
+            case "=": return TokenCONST.TkEqual;
+            case "\\=": return TokenCONST.TkNotEqual;
+
 
             default: return TokenCONST.TkUnknown;
         }
