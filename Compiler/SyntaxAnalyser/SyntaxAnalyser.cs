@@ -101,8 +101,6 @@ public static class SyntaxAnalyser
             case "return": return TokenCONST.TkReturn;
             case "var": return TokenCONST.TkVar;
             case "routine": return TokenCONST.TkRoutine;
-            case "record": return TokenCONST.TkRecord;
-            case "array": return TokenCONST.TkArray;
             case "for": return TokenCONST.TkFor;
             case "while": return TokenCONST.TkWhile;
             case "loop": return TokenCONST.TkLoop;
