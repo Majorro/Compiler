@@ -8,7 +8,9 @@ public static class SyntaxAnalyser
     {
         var tokens = new List<Token>();
         var buffer = "";
-
+        var lineNumber = 0;
+        var columnNumber = 0;
+        text += ' ';
         foreach (var symbol in text + ' ')
         {
             var preset = CheckForEnum(buffer);
@@ -57,16 +59,24 @@ public static class SyntaxAnalyser
             }
             else if (TokenRegexes.Whitespaces.IsMatch(buffer))
             {
+                if (buffer.Contains('\n'))
+                {
+                    lineNumber++;
+                    columnNumber = 0;
+                }
+
                 buffer = "";
             }
 
             if (token is not null)
             {
+                token.span = new Span(lineNumber, columnNumber - buffer.Length, columnNumber - 1);
                 tokens.Add(token);
                 buffer = "";
             }
 
             buffer += symbol;
+            columnNumber++;
         }
 
         return tokens;
