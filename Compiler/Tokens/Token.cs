@@ -19,7 +19,7 @@ public class IdentifierTk : Token
 }
 
 /// <summary>
-///     This generic class is recommended to use for Keyword, Type, Operator, and Punctuator tokes
+///     This generic class is recommended to use for Keyword, Type, Operator, Punctuator, and comparator tokens
 /// </summary>
 /// <typeparam name="T"></typeparam>
 public class EnumeratedTk<T> : Token where T : Enum
