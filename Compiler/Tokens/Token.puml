@@ -3,6 +3,11 @@ abstract class Token {
     + span : Span
     + {abstract} TokenId : TokenCONST <<get>>
 }
+class UnknownTk {
+    + value : string
+    + UnknownTk(value:string)
+    + <<override>> TokenId : TokenCONST <<get>>
+}
 class IdentifierTk {
     + value : string
     + IdentifierTk(value:string)
@@ -44,6 +49,7 @@ class Span {
     + EndPost : int
     + Span(lineNumber:long, startPos:int, endPost:int)
 }
+Token <|-- UnknownTk
 Token <|-- IdentifierTk
 Token <|-- "EnumeratedTk`1"
 Token <|-- IntTk

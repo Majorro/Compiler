@@ -3,7 +3,8 @@
 using Compiler.SyntaxAnalyser;
 using Newtonsoft.Json;
 
-var program = @"routine gcd (a: integer, b: integer): integer is
+var program = @"2a 4.2.0
+routine gcd (a: integer, b: integer): integer is
     if a > b then
 //some comment
        var small := b;
@@ -16,8 +17,15 @@ var program = @"routine gcd (a: integer, b: integer): integer is
         end;
     return ans;";
 
-// program = @"for i in 1 .. (small + 1) loop is";
+// program = @"2a int";
 
 
 foreach (var tok in SyntaxAnalyser.FinalStateAutomata(program))
-    Console.WriteLine($"{tok.TokenId} \t {JsonConvert.SerializeObject(tok)}");
+{
+    Console.ForegroundColor = ConsoleColor.Yellow;
+    Console.Write($"{tok.GetType().Name}\t");
+    Console.ForegroundColor = ConsoleColor.Green;
+    Console.Write($"{tok.TokenId}\t");
+    Console.ForegroundColor = ConsoleColor.White;
+    Console.WriteLine($"{JsonConvert.SerializeObject(tok)}");
+}

@@ -41,7 +41,8 @@ public static class SyntaxAnalyser
                     token = new EnumeratedTk<Comparators>(preset);
             }
             // Makes Const tokens of types integer and real
-            else if (TokenRegexes.Numbers.IsMatch(buffer) && !(char.IsNumber(symbol) || symbol == '.'))
+            else if (TokenRegexes.Numbers.IsMatch(buffer) &&
+                     !(char.IsNumber(symbol) || char.IsLetter(symbol) || symbol == '.'))
             {
                 if (long.TryParse(buffer, out var integer)) token = new IntTk(integer);
 
@@ -72,6 +73,10 @@ public static class SyntaxAnalyser
                 }
 
                 buffer = "";
+            }
+            else if (TokenRegexes.Unknown.IsMatch(buffer) && TokenRegexes.Whitespaces.IsMatch(symbol.ToString()))
+            {
+                token = new UnknownTk(buffer);
             }
 
             if (token is not null)

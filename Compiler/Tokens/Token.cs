@@ -6,6 +6,18 @@ public abstract class Token
     public abstract TokenCONST TokenId { get; }
 }
 
+public class UnknownTk : Token
+{
+    public string value;
+
+    public UnknownTk(string value)
+    {
+        this.value = value;
+    }
+
+    public override TokenCONST TokenId => TokenCONST.TkUnknown;
+}
+
 public class IdentifierTk : Token
 {
     public string value;
