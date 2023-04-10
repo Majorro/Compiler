@@ -79,7 +79,7 @@ namespace Compiler.CodeAnalysis.SyntaxAnalysis
         public Enum? Kind { get; }
     }
 
-    public sealed class ProgramNode : Node
+    public class ProgramNode : Node
     {
         public List<DeclarationNode> DeclarationList { get; } = new();
 
@@ -109,7 +109,7 @@ namespace Compiler.CodeAnalysis.SyntaxAnalysis
             Type = type;
     }
 
-    public sealed class VariableDeclarationNode : SimpleDeclarationNode
+    public class VariableDeclarationNode : SimpleDeclarationNode
     {
         public ExpressionNode Expression { get; }
 
@@ -121,7 +121,7 @@ namespace Compiler.CodeAnalysis.SyntaxAnalysis
             Expression = expression;
     }
 
-    public sealed class TypeDeclarationNode : SimpleDeclarationNode
+    public class TypeDeclarationNode : SimpleDeclarationNode
     {
         public override IEnumerable<Node> GetChildren() =>
             GetChildren(null, Identifier, Type);
@@ -131,7 +131,7 @@ namespace Compiler.CodeAnalysis.SyntaxAnalysis
         { }
     }
 
-    public sealed class RoutineDeclarationNode : DeclarationNode
+    public class RoutineDeclarationNode : DeclarationNode
     {
         public TypeNode? ReturnType { get; }
         public List<ParameterDeclarationNode> Parameters { get; }
@@ -149,7 +149,7 @@ namespace Compiler.CodeAnalysis.SyntaxAnalysis
         }
     }
 
-    public sealed class ParameterDeclarationNode : Node
+    public class ParameterDeclarationNode : Node
     {
         public IdentifierNode Identifier { get; }
         public TypeNode Type { get; }
@@ -195,7 +195,7 @@ namespace Compiler.CodeAnalysis.SyntaxAnalysis
         }
     }
 
-    public sealed class ArrayTypeNode : TypeNode
+    public class ArrayTypeNode : TypeNode
     {
         public TypeNode ElementsType { get; }
         public ExpressionNode SizeExpression { get; }
@@ -211,7 +211,7 @@ namespace Compiler.CodeAnalysis.SyntaxAnalysis
         }
     }
 
-    public sealed class RecordTypeNode : TypeNode
+    public class RecordTypeNode : TypeNode
     {
         public List<VariableDeclarationNode> Members { get; } = new();
 
@@ -223,7 +223,7 @@ namespace Compiler.CodeAnalysis.SyntaxAnalysis
             Members = members.Items;
     }
 
-    public sealed class BodyNode : ListNode<Node>
+    public class BodyNode : ListNode<Node>
     {
         public BodyNode()
         { }
@@ -241,7 +241,7 @@ namespace Compiler.CodeAnalysis.SyntaxAnalysis
     {
     }
 
-    public sealed class AssignmentNode : StatementNode
+    public class AssignmentNode : StatementNode
     {
         public ModifiablePrimaryNode Identifier { get; }
         public ExpressionNode Expression { get; }
@@ -256,7 +256,7 @@ namespace Compiler.CodeAnalysis.SyntaxAnalysis
         }
     }
 
-    public sealed class RoutineCallNode : StatementNode
+    public class RoutineCallNode : StatementNode
     {
         public IdentifierNode RoutineIdentifier { get; }
         public List<ExpressionNode> Arguments { get; }
@@ -271,7 +271,7 @@ namespace Compiler.CodeAnalysis.SyntaxAnalysis
         }
     }
 
-    public sealed class WhileLoopNode : StatementNode
+    public class WhileLoopNode : StatementNode
     {
         public ExpressionNode Condition { get; }
         public BodyNode Body { get; }
@@ -286,7 +286,7 @@ namespace Compiler.CodeAnalysis.SyntaxAnalysis
         }
     }
 
-    public sealed class ForLoopNode : StatementNode
+    public class ForLoopNode : StatementNode
     {
         public IdentifierNode VariableIdentifier { get; }
         public RangeNode Range { get; }
@@ -303,7 +303,7 @@ namespace Compiler.CodeAnalysis.SyntaxAnalysis
         }
     }
 
-    public sealed class RangeNode : Node
+    public class RangeNode : Node
     {
         public ExpressionNode From { get; }
         public ExpressionNode To { get; }
@@ -320,7 +320,7 @@ namespace Compiler.CodeAnalysis.SyntaxAnalysis
         }
     }
 
-    public sealed class IfNode : StatementNode
+    public class IfNode : StatementNode
     {
         public ExpressionNode Condition { get; }
         public BodyNode ThenBody { get; }
@@ -337,7 +337,7 @@ namespace Compiler.CodeAnalysis.SyntaxAnalysis
         }
     }
 
-    public sealed class ReturnNode : StatementNode
+    public class ReturnNode : StatementNode
     {
         public ExpressionNode? Expression { get; }
 
@@ -448,7 +448,7 @@ namespace Compiler.CodeAnalysis.SyntaxAnalysis
         Boolean
     }
 
-    public sealed class LiteralNode : PrimaryNode, ILeafNode
+    public class LiteralNode : PrimaryNode, ILeafNode
     {
         public Token Token { get; }
         public Enum? Kind { get; }
@@ -463,7 +463,7 @@ namespace Compiler.CodeAnalysis.SyntaxAnalysis
         }
     }
 
-    public sealed class IdentifierNode : PrimaryNode, ILeafNode
+    public class IdentifierNode : PrimaryNode, ILeafNode
     {
         public Token Token { get; }
         public Enum? Kind => null!;
@@ -506,7 +506,7 @@ namespace Compiler.CodeAnalysis.SyntaxAnalysis
         GreaterOrEqual
     }
 
-    public sealed class OperatorNode : Node, ILeafNode
+    public class OperatorNode : Node, ILeafNode
     {
         public Token Token { get; }
         public Enum? Kind { get; }

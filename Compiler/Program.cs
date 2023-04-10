@@ -1,22 +1,34 @@
-﻿using Compiler.CodeAnalysis;
+﻿using System.Security.Cryptography;
+using Compiler.CodeAnalysis;
+using Compiler.CodeAnalysis.LexerTokens;
 using Compiler.CodeAnalysis.SyntaxAnalysis;
+using Compiler.CodeAnalysis.Typechecker;
 using Newtonsoft.Json;
 
+
 const string program = @"
-routine gcd (a: integer, b: integer): integer is
-    if a > b then
-//some comment
-       var small is true;
-    else
-       var small is a;
-    end;
-    for i in 1 .. small + 1 loop
-        if a % i = 0 and b % i = 0 then
-          var ans is i;
-        end;
-    end;
-    return ans;
-end;";
+routine main(): integer is
+    var b = 2;
+    return b;
+end;
+";
+
+// const string program = @"
+// routine gcd (a: integer, b: integer): integer is
+//     if a + a > b then
+//        var small is true;
+//     else
+//        var small is a;
+//     end;
+//     for i in 1 .. small + 1 loop
+//         if a % i = 0 and b % i = 0 then
+//           var ans is i;
+//         end;
+//     end;
+//     return ans;
+// end;";
+
+
 
 // const string program = @"
 // var a is 1+2;
@@ -83,4 +95,7 @@ void PrintAst(string prog)
 
     Console.WriteLine(parser.Parse());
     Console.WriteLine(parser.Tree);
+    var tree = parser.Tree;
+    Typecheck.typecheckProgramm(parser);
+    Console.WriteLine("h");
 }
