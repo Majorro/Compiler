@@ -107,7 +107,7 @@ public class Lexer : AbstractScanner<Node, LexLocation>
 
     public override void yyerror(string format, params object[] args)
     {
-        Console.Error.WriteLine(format, args);
+        Console.Error.WriteLine($"{format} at {CurrentToken.Span}", args);
     }
 
     private static Tokens CheckForEnum(string inputWord)

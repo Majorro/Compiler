@@ -670,7 +670,9 @@ namespace QUT.Gppg {
         /// <param name="last">The last location in the result span</param>
         /// <returns>The merged span</returns>
         public LexLocation Merge( LexLocation last ) { return new LexLocation( this.startLine, this.startColumn, last.endLine, last.endColumn ); }
-    }
+
+        public override string ToString() => string.Format( CultureInfo.InvariantCulture, "({0},{1})-({2},{3})", startLine, startColumn, endLine, endColumn );
+ }
 
     /// <summary>
     /// Abstract scanner class that GPPG expects its scanners to 
