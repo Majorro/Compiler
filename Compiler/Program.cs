@@ -14,6 +14,8 @@ routine example(a: integer, b: integer): integer is
     for i in 1 .. a + 1 loop
         if a % i = 0 and b % i = 0 then
             d := i;
+        else
+            d := d + 1;
         end;
     end;
 
@@ -22,7 +24,7 @@ end;
 
 routine main(a: integer): integer is
     var d is a + 1 * 10 / 100;
-    return d;
+    return c;
 end;
 ";
 
@@ -86,7 +88,7 @@ void PrintAst(string prog)
 
     parser.Parse();
     
-    // Console.WriteLine(parser.Tree);
+    Console.WriteLine(parser.Tree);
     var tree = parser.Tree;
     
     Typecheck.typecheckProgram(parser);

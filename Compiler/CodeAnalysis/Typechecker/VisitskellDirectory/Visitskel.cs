@@ -12,8 +12,6 @@ public class Visitskel
             switch (routine)
             {
                 case RoutineDeclarationNode node:
-                    Console.WriteLine("New routine!");
-                    Console.WriteLine(routine);
                     DeclVisitor(node, context);
                     break;
             }
@@ -23,8 +21,9 @@ public class Visitskel
 
     public object DeclVisitor(RoutineDeclarationNode decl, Context context)
     {
-        // Parameters
         var childContext = new Context(context);
+        
+        // Parameters
         foreach (var param in decl.Parameters)
         {
             DeclParamVisitor(param, childContext);
@@ -44,42 +43,8 @@ public class Visitskel
         Console.Write("Return type: ");
         Console.WriteLine(returnType);
 
-        // Body - reversed iterating
-        for (var i = decl.Body.Items.Count - 1; i >= 0; i--)
-        {
-            switch (decl.Body.Items[i])
-            {
-                case ReturnNode node:
-                    //Console.WriteLine("New ReturnNode");
-                    //Console.WriteLine(node);
-                    break;
-                
-                case VariableDeclarationNode node:
-                    //Console.WriteLine("New VariableDeclarationNode");
-                    //Console.WriteLine(node);
-                    break;
-                
-                case IfNode node:
-                    //Console.WriteLine("New IfNode");
-                    //Console.WriteLine(node);
-                    break;
-                    
-                case ForLoopNode node:
-                    //Console.WriteLine("New ForLoopNode");
-                    //Console.WriteLine(node);
-                    break;
-                
-                case WhileLoopNode node:
-                    break;
-                
-                case AssignmentNode node:
-                    break;
-                
-                // Doesn't work
-                case RoutineCallNode node:
-                    break;
-            }
-        }
+        // Body
+        BodyVisitor(decl.Body, childContext, true);
         
         return null;
     }
@@ -88,17 +53,78 @@ public class Visitskel
     {
         var name = param.Identifier.Token as IdentifierTk;
         var type = param.Type.Kind;
-        context.addStelladient(name.value, param.Type);
+        context.add(name.value, param.Type);
     }
+
+    public void BodyVisitor(BodyNode body, Context context, Boolean reversedIteration = false)
+    {
+        var items = body.Items;
+        if (reversedIteration)
+        {
+            items.Reverse();
+        }
+        
+        foreach (var bodyStatement in items)
+        {
+            switch (bodyStatement)
+            {
+                case ReturnNode node:
+                    ReturnVisitor(node, context);
+                    break;
+                
+                case VariableDeclarationNode node:
+                    VariableDeclVisitor(node, context);
+                    break;
+                
+                case IfNode node:
+                    IfVisitor(node, context);
+                    break;
+                    
+                case ForLoopNode node:
+                    ForLoopVisitor(node, context);
+                    break;
+                
+                case WhileLoopNode node:
+                    WhileLoopVisitor(node, context);
+                    break;
+                
+                case AssignmentNode node:
+                    AssigmentVisitor(node, context);
+                    break;
+                
+                // Doesn't work
+                case RoutineCallNode node:
+                    RoutineCallVisitor(node, context);
+                    break;
+            }
+        }
+    }
+    
+    public void ReturnVisitor(ReturnNode returnStatement, Context context) {}
     
     public void VariableDeclVisitor(VariableDeclarationNode variable, Context context) {}
     
     public void AssigmentVisitor(AssignmentNode assigment, Context context) {}
-    
-    public void IfVisitor(IfNode ifCondition, Context context) {}
-    
-    public void ForLoopVisitor(ForLoopNode loop, Context context) {}
-    
+
+    public void IfVisitor(IfNode ifStatement, Context context)
+    {
+        var childContext = new Context(context); 
+        // Add handling condition;
+         
+        BodyVisitor(ifStatement.ThenBody, childContext);
+
+        if (ifStatement.ElseBody != null) BodyVisitor(ifStatement.ElseBody, childContext);
+    }
+
+    public void ForLoopVisitor(ForLoopNode loop, Context context)
+    {
+        var childContext = new Context(context);
+        
+        //Add handling Range and identifier
+        
+        BodyVisitor(loop.Body, childContext);
+    }
+
     public void WhileLoopVisitor(WhileLoopNode loop, Context context) {}
     
     public void RoutineCallVisitor(RoutineCallNode call, Context context) {}
