@@ -1,0 +1,15 @@
+﻿routine gcd (a: integer, b: integer): integer is
+    if a > b then
+        var small is true;
+    else
+        var small is a;
+    end;
+    
+    for i in 1 .. small + 1 loop
+        if a % i = 0 and b % i = 0 then
+            var ans is i;
+        end;
+    end;
+    
+    return ans;
+end;

@@ -1,39 +1,44 @@
-﻿using Compiler.CodeAnalysis;
+﻿using System.Security.Cryptography;
+using Compiler.CodeAnalysis;
+using Compiler.CodeAnalysis.LexerTokens;
 using Compiler.CodeAnalysis.SyntaxAnalysis;
+using Compiler.CodeAnalysis.Typechecker;
 using Newtonsoft.Json;
 
+// Doesn't work:
+// function calls
 const string program = @"
-routine gcd (a: integer, b: integer): integer is
-    if a > b then
-//some comment
-       var small is true;
-    else
-       var small is a;
-    end;
-    for i in 1 .. small + 1 loop
+routine example(a: integer, b: integer): integer is
+    var d is 1;
+
+    for i in 1 .. a + 1 loop
         if a % i = 0 and b % i = 0 then
-          var ans is i;
+            d := i;
+        else
+            d := d + 1;
         end;
     end;
-    return ans;
-end;";
+
+    return d;
+end;
+
+routine main(a: integer): integer is
+    var d is a + 1 * 10 / 100;
+    return c;
+end;
+";
+
+
 
 // const string program = @"
 // var a is 1+2;
 // ";
-
-// const string program = @"
-// routine SumFunction ( a : integer, b: integer ) : integer is
-//     return a+b;
-// end;
-// ";
 // const string program = @"
 // routine SumOfArray ( arr : array[] integer ) : integer is
-//
 //     var sum is 0;
 //
 //     for i in 0 .. arr.Length loop
-//         sum := SumFunction(sum, arr[i]);
+//         sum := i + 1;
 //     end;
 //
 //     return sum;
@@ -81,6 +86,12 @@ void PrintAst(string prog)
 
     var parser = new Parser(lexer);
 
-    Console.WriteLine(parser.Parse());
+    parser.Parse();
+    
     Console.WriteLine(parser.Tree);
+    var tree = parser.Tree;
+    
+    Typecheck.typecheckProgram(parser);
+    
+    Console.WriteLine("Type checking done!");
 }
