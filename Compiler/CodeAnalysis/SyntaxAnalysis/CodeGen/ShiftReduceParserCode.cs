@@ -623,31 +623,26 @@ namespace QUT.Gppg {
     internal class LexLocation : IMerge<LexLocation>
 #endif
  {
-        private int startLine;   // start line
-        private int startColumn; // start column
-        private int endLine;     // end line
-        private int endColumn;   // end column
-
         /// <summary>
         /// The line at which the text span starts.
         /// </summary>
-        public int StartLine { get { return startLine; } }
+        public int StartLine { get; }
 
         /// <summary>
         /// The column at which the text span starts.
         /// </summary>
-        public int StartColumn { get { return startColumn; } }
+        public int StartColumn { get; }
 
         /// <summary>
         /// The line on which the text span ends.
         /// </summary>
-        public int EndLine { get { return endLine; } }
+        public int EndLine { get; }
 
         /// <summary>
         /// The column of the first character
         /// beyond the end of the text span.
         /// </summary>
-        public int EndColumn { get { return endColumn; } }
+        public int EndColumn { get; }
 
         /// <summary>
         /// Default no-arg constructor.
@@ -661,7 +656,7 @@ namespace QUT.Gppg {
         /// <param name="sc">start column</param>
         /// <param name="el">end line </param>
         /// <param name="ec">end column</param>
-        public LexLocation( int sl, int sc, int el, int ec ) { startLine = sl; startColumn = sc; endLine = el; endColumn = ec; }
+        public LexLocation( int sl, int sc, int el, int ec ) { StartLine = sl; StartColumn = sc; EndLine = el; EndColumn = ec; }
 
         /// <summary>
         /// Create a text location which spans from the 
@@ -669,9 +664,18 @@ namespace QUT.Gppg {
         /// </summary>
         /// <param name="last">The last location in the result span</param>
         /// <returns>The merged span</returns>
-        public LexLocation Merge( LexLocation last ) { return new LexLocation( this.startLine, this.startColumn, last.endLine, last.endColumn ); }
+        public LexLocation Merge( LexLocation last ) { return new LexLocation( StartLine, StartColumn, last.EndLine, last.EndColumn ); }
 
-        public override string ToString() => string.Format( CultureInfo.InvariantCulture, "({0},{1})-({2},{3})", startLine, startColumn, endLine, endColumn );
+        public override bool Equals(object obj)
+        {
+            if (obj is not LexLocation other) return false;
+            return other.StartLine == StartLine && other.StartColumn == StartColumn && other.EndLine == EndLine && other.EndColumn == EndColumn;
+        }
+
+        public override int GetHashCode() =>
+            StartLine ^ StartColumn ^ EndLine ^ EndColumn;
+
+        public override string ToString() => string.Format( CultureInfo.InvariantCulture, "({0},{1})-({2},{3})", StartLine, StartColumn, EndLine, EndColumn );
  }
 
     /// <summary>

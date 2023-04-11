@@ -3,8 +3,8 @@
 // (see accompanying GPPGcopyright.rtf)
 
 // GPPG version 1.5.2
-// DateTime: 4/11/2023 4:09:50 AM
-// Input file <Language.y - 4/11/2023 4:09:45 AM>
+// DateTime: 4/11/2023 5:39:17 AM
+// Input file <Language.y - 4/11/2023 5:39:16 AM>
 
 // options: lines
 
@@ -398,17 +398,17 @@ public partial class Parser: ShiftReduceParser<Node, LexLocation>
         break;
       case 25: // PrimitiveType -> TkInt
 #line 155 "Language.y"
-        { CurrentSemanticValue = new TypeNode(TypeKind.Integer, new IdentifierNode(Lexer.CurrentToken)); }
+        { CurrentSemanticValue = new TypeNode(TypeKind.Integer, new IdentifierNode(Lexer.ProgramTokenByLocation[LocationStack[LocationStack.Depth-1]])); }
 #line default
         break;
       case 26: // PrimitiveType -> TkReal
 #line 156 "Language.y"
-         { CurrentSemanticValue = new TypeNode(TypeKind.Real, new IdentifierNode(Lexer.CurrentToken)); }
+         { CurrentSemanticValue = new TypeNode(TypeKind.Real, new IdentifierNode(Lexer.ProgramTokenByLocation[LocationStack[LocationStack.Depth-1]])); }
 #line default
         break;
       case 27: // PrimitiveType -> TkBool
 #line 157 "Language.y"
-         { CurrentSemanticValue = new TypeNode(TypeKind.Boolean, new IdentifierNode(Lexer.CurrentToken)); }
+         { CurrentSemanticValue = new TypeNode(TypeKind.Boolean, new IdentifierNode(Lexer.ProgramTokenByLocation[LocationStack[LocationStack.Depth-1]])); }
 #line default
         break;
       case 28: // RecordType -> TkRecord, TkCurlyOpen, VariableDeclarations, TkCurlyClose, TkEnd
@@ -518,17 +518,17 @@ public partial class Parser: ShiftReduceParser<Node, LexLocation>
         break;
       case 55: // Expression -> Expression, TkAnd, Relation
 #line 237 "Language.y"
-                            { CurrentSemanticValue = new ExpressionNode((ExpressionNode)ValueStack[ValueStack.Depth-3], new OperatorNode(Operator.And, Lexer.CurrentToken), (ExpressionNode)ValueStack[ValueStack.Depth-1]); }
+                            { CurrentSemanticValue = new ExpressionNode((ExpressionNode)ValueStack[ValueStack.Depth-3], new OperatorNode(Operator.And, Lexer.ProgramTokenByLocation[LocationStack[LocationStack.Depth-2]]), (ExpressionNode)ValueStack[ValueStack.Depth-1]); }
 #line default
         break;
       case 56: // Expression -> Expression, TkOr, Relation
 #line 238 "Language.y"
-                           { CurrentSemanticValue = new ExpressionNode((ExpressionNode)ValueStack[ValueStack.Depth-3], new OperatorNode(Operator.Or, Lexer.CurrentToken), (ExpressionNode)ValueStack[ValueStack.Depth-1]); }
+                           { CurrentSemanticValue = new ExpressionNode((ExpressionNode)ValueStack[ValueStack.Depth-3], new OperatorNode(Operator.Or, Lexer.ProgramTokenByLocation[LocationStack[LocationStack.Depth-2]]), (ExpressionNode)ValueStack[ValueStack.Depth-1]); }
 #line default
         break;
       case 57: // Expression -> Expression, TkXor, Relation
 #line 239 "Language.y"
-                            { CurrentSemanticValue = new ExpressionNode((ExpressionNode)ValueStack[ValueStack.Depth-3], new OperatorNode(Operator.Xor, Lexer.CurrentToken), (ExpressionNode)ValueStack[ValueStack.Depth-1]); }
+                            { CurrentSemanticValue = new ExpressionNode((ExpressionNode)ValueStack[ValueStack.Depth-3], new OperatorNode(Operator.Xor, Lexer.ProgramTokenByLocation[LocationStack[LocationStack.Depth-2]]), (ExpressionNode)ValueStack[ValueStack.Depth-1]); }
 #line default
         break;
       case 58: // Expression -> Relation
@@ -538,32 +538,32 @@ public partial class Parser: ShiftReduceParser<Node, LexLocation>
         break;
       case 59: // Relation -> Simple, TkLess, Simple
 #line 245 "Language.y"
-                       { CurrentSemanticValue = new RelationNode((ExpressionNode)ValueStack[ValueStack.Depth-3], new OperatorNode(Operator.Less, Lexer.CurrentToken), (ExpressionNode)ValueStack[ValueStack.Depth-1]); }
+                       { CurrentSemanticValue = new RelationNode((ExpressionNode)ValueStack[ValueStack.Depth-3], new OperatorNode(Operator.Less, Lexer.ProgramTokenByLocation[LocationStack[LocationStack.Depth-2]]), (ExpressionNode)ValueStack[ValueStack.Depth-1]); }
 #line default
         break;
       case 60: // Relation -> Simple, TkLeq, Simple
 #line 246 "Language.y"
-                      { CurrentSemanticValue = new RelationNode((ExpressionNode)ValueStack[ValueStack.Depth-3], new OperatorNode(Operator.LessOrEqual, Lexer.CurrentToken), (ExpressionNode)ValueStack[ValueStack.Depth-1]); }
+                      { CurrentSemanticValue = new RelationNode((ExpressionNode)ValueStack[ValueStack.Depth-3], new OperatorNode(Operator.LessOrEqual, Lexer.ProgramTokenByLocation[LocationStack[LocationStack.Depth-2]]), (ExpressionNode)ValueStack[ValueStack.Depth-1]); }
 #line default
         break;
       case 61: // Relation -> Simple, TkGreater, Simple
 #line 247 "Language.y"
-                          { CurrentSemanticValue = new RelationNode((ExpressionNode)ValueStack[ValueStack.Depth-3], new OperatorNode(Operator.Greater, Lexer.CurrentToken), (ExpressionNode)ValueStack[ValueStack.Depth-1]); }
+                          { CurrentSemanticValue = new RelationNode((ExpressionNode)ValueStack[ValueStack.Depth-3], new OperatorNode(Operator.Greater, Lexer.ProgramTokenByLocation[LocationStack[LocationStack.Depth-2]]), (ExpressionNode)ValueStack[ValueStack.Depth-1]); }
 #line default
         break;
       case 62: // Relation -> Simple, TkGeq, Simple
 #line 248 "Language.y"
-                      { CurrentSemanticValue = new RelationNode((ExpressionNode)ValueStack[ValueStack.Depth-3], new OperatorNode(Operator.GreaterOrEqual, Lexer.CurrentToken), (ExpressionNode)ValueStack[ValueStack.Depth-1]); }
+                      { CurrentSemanticValue = new RelationNode((ExpressionNode)ValueStack[ValueStack.Depth-3], new OperatorNode(Operator.GreaterOrEqual, Lexer.ProgramTokenByLocation[LocationStack[LocationStack.Depth-2]]), (ExpressionNode)ValueStack[ValueStack.Depth-1]); }
 #line default
         break;
       case 63: // Relation -> Simple, TkEqual, Simple
 #line 249 "Language.y"
-                        { CurrentSemanticValue = new RelationNode((ExpressionNode)ValueStack[ValueStack.Depth-3], new OperatorNode(Operator.Equal, Lexer.CurrentToken), (ExpressionNode)ValueStack[ValueStack.Depth-1]); }
+                        { CurrentSemanticValue = new RelationNode((ExpressionNode)ValueStack[ValueStack.Depth-3], new OperatorNode(Operator.Equal, Lexer.ProgramTokenByLocation[LocationStack[LocationStack.Depth-2]]), (ExpressionNode)ValueStack[ValueStack.Depth-1]); }
 #line default
         break;
       case 64: // Relation -> Simple, TkNotEqual, Simple
 #line 250 "Language.y"
-                           { CurrentSemanticValue = new RelationNode((ExpressionNode)ValueStack[ValueStack.Depth-3], new OperatorNode(Operator.NotEqual, Lexer.CurrentToken), (ExpressionNode)ValueStack[ValueStack.Depth-1]); }
+                           { CurrentSemanticValue = new RelationNode((ExpressionNode)ValueStack[ValueStack.Depth-3], new OperatorNode(Operator.NotEqual, Lexer.ProgramTokenByLocation[LocationStack[LocationStack.Depth-2]]), (ExpressionNode)ValueStack[ValueStack.Depth-1]); }
 #line default
         break;
       case 65: // Relation -> Simple
@@ -573,17 +573,17 @@ public partial class Parser: ShiftReduceParser<Node, LexLocation>
         break;
       case 66: // Simple -> Simple, TkMultiply, Factor
 #line 256 "Language.y"
-                           { CurrentSemanticValue = new SimpleNode((ExpressionNode)ValueStack[ValueStack.Depth-3], new OperatorNode(Operator.Multiply, Lexer.CurrentToken), (ExpressionNode)ValueStack[ValueStack.Depth-1]); }
+                           { CurrentSemanticValue = new SimpleNode((ExpressionNode)ValueStack[ValueStack.Depth-3], new OperatorNode(Operator.Multiply, Lexer.ProgramTokenByLocation[LocationStack[LocationStack.Depth-2]]), (ExpressionNode)ValueStack[ValueStack.Depth-1]); }
 #line default
         break;
       case 67: // Simple -> Simple, TkDivide, Factor
 #line 257 "Language.y"
-                         { CurrentSemanticValue = new SimpleNode((ExpressionNode)ValueStack[ValueStack.Depth-3], new OperatorNode(Operator.Divide, Lexer.CurrentToken), (ExpressionNode)ValueStack[ValueStack.Depth-1]); }
+                         { CurrentSemanticValue = new SimpleNode((ExpressionNode)ValueStack[ValueStack.Depth-3], new OperatorNode(Operator.Divide, Lexer.ProgramTokenByLocation[LocationStack[LocationStack.Depth-2]]), (ExpressionNode)ValueStack[ValueStack.Depth-1]); }
 #line default
         break;
       case 68: // Simple -> Simple, TkPercent, Factor
 #line 258 "Language.y"
-                          { CurrentSemanticValue = new SimpleNode((ExpressionNode)ValueStack[ValueStack.Depth-3], new OperatorNode(Operator.Modulo, Lexer.CurrentToken), (ExpressionNode)ValueStack[ValueStack.Depth-1]); }
+                          { CurrentSemanticValue = new SimpleNode((ExpressionNode)ValueStack[ValueStack.Depth-3], new OperatorNode(Operator.Modulo, Lexer.ProgramTokenByLocation[LocationStack[LocationStack.Depth-2]]), (ExpressionNode)ValueStack[ValueStack.Depth-1]); }
 #line default
         break;
       case 69: // Simple -> Factor
@@ -593,12 +593,12 @@ public partial class Parser: ShiftReduceParser<Node, LexLocation>
         break;
       case 70: // Factor -> Factor, TkMinus, Summand
 #line 264 "Language.y"
-                         { CurrentSemanticValue = new FactorNode((ExpressionNode)ValueStack[ValueStack.Depth-3], new OperatorNode(Operator.Minus, Lexer.CurrentToken), (ExpressionNode)ValueStack[ValueStack.Depth-1]); }
+                         { CurrentSemanticValue = new FactorNode((ExpressionNode)ValueStack[ValueStack.Depth-3], new OperatorNode(Operator.Minus, Lexer.ProgramTokenByLocation[LocationStack[LocationStack.Depth-2]]), (ExpressionNode)ValueStack[ValueStack.Depth-1]); }
 #line default
         break;
       case 71: // Factor -> Factor, TkPlus, Summand
 #line 265 "Language.y"
-                        { CurrentSemanticValue = new FactorNode((ExpressionNode)ValueStack[ValueStack.Depth-3], new OperatorNode(Operator.Plus, Lexer.CurrentToken), (ExpressionNode)ValueStack[ValueStack.Depth-1]); }
+                        { CurrentSemanticValue = new FactorNode((ExpressionNode)ValueStack[ValueStack.Depth-3], new OperatorNode(Operator.Plus, Lexer.ProgramTokenByLocation[LocationStack[LocationStack.Depth-2]]), (ExpressionNode)ValueStack[ValueStack.Depth-1]); }
 #line default
         break;
       case 72: // Factor -> Summand
@@ -618,17 +618,17 @@ public partial class Parser: ShiftReduceParser<Node, LexLocation>
         break;
       case 75: // Primary -> TkIntLiteral
 #line 275 "Language.y"
-               { CurrentSemanticValue = new LiteralNode(LiteralKind.Integer, Lexer.CurrentToken); }
+               { CurrentSemanticValue = new LiteralNode(LiteralKind.Integer, Lexer.ProgramTokenByLocation[LocationStack[LocationStack.Depth-1]]); }
 #line default
         break;
       case 76: // Primary -> TkRealLiteral
 #line 276 "Language.y"
-                { CurrentSemanticValue = new LiteralNode(LiteralKind.Real, Lexer.CurrentToken); }
+                { CurrentSemanticValue = new LiteralNode(LiteralKind.Real, Lexer.ProgramTokenByLocation[LocationStack[LocationStack.Depth-1]]); }
 #line default
         break;
       case 77: // Primary -> TkBoolLiteral
 #line 277 "Language.y"
-                { CurrentSemanticValue = new LiteralNode(LiteralKind.Boolean, Lexer.CurrentToken); }
+                { CurrentSemanticValue = new LiteralNode(LiteralKind.Boolean, Lexer.ProgramTokenByLocation[LocationStack[LocationStack.Depth-1]]); }
 #line default
         break;
       case 79: // ModifiablePrimary -> ModifiablePrimary, TkDot, Identifier
@@ -648,7 +648,7 @@ public partial class Parser: ShiftReduceParser<Node, LexLocation>
         break;
       case 82: // Identifier -> TkIdentifier
 #line 289 "Language.y"
-               { CurrentSemanticValue = new IdentifierNode(Lexer.CurrentToken); }
+               { CurrentSemanticValue = new IdentifierNode(Lexer.ProgramTokenByLocation[LocationStack[LocationStack.Depth-1]]); }
 #line default
         break;
     }

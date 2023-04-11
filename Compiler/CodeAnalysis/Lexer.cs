@@ -11,7 +11,9 @@ public class Lexer : AbstractScanner<Node, LexLocation>
     private int _position;
 
     public List<Token> ProgramTokens { get; } = new();
-    public Token CurrentToken => ProgramTokens[_position - 1];
+    public Dictionary<LexLocation, Token> ProgramTokenByLocation { get; } = new();
+    public Token? CurrentToken => _position - 1 >= 0 ? ProgramTokens[_position - 1] : null;
+    public override LexLocation? yylloc => CurrentToken?.Span;
 
     public Lexer(string programText)
     {
@@ -89,6 +91,7 @@ public class Lexer : AbstractScanner<Node, LexLocation>
             {
                 token.Span = new LexLocation(lineNumber, columnNumber - buffer.Length, lineNumber, columnNumber - 1);
                 ProgramTokens.Add(token);
+                ProgramTokenByLocation.Add(token.Span, token);
                 buffer = "";
             }
 

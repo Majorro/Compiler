@@ -152,9 +152,9 @@ Type
 ;
 
 PrimitiveType
-: TkInt { $$ = new TypeNode(TypeKind.Integer, new IdentifierNode(Lexer.CurrentToken)); }
-| TkReal { $$ = new TypeNode(TypeKind.Real, new IdentifierNode(Lexer.CurrentToken)); }
-| TkBool { $$ = new TypeNode(TypeKind.Boolean, new IdentifierNode(Lexer.CurrentToken)); }
+: TkInt { $$ = new TypeNode(TypeKind.Integer, new IdentifierNode(Lexer.ProgramTokenByLocation[@1])); }
+| TkReal { $$ = new TypeNode(TypeKind.Real, new IdentifierNode(Lexer.ProgramTokenByLocation[@1])); }
+| TkBool { $$ = new TypeNode(TypeKind.Boolean, new IdentifierNode(Lexer.ProgramTokenByLocation[@1])); }
 ;
 
 /* RecordTypeNode(IdentifierNode identifier, ListNode<VariableDeclarationNode> member`s) */
@@ -234,35 +234,35 @@ ReturnStatement
 
 /* ExpressionNode(ExpressionNode lhs, OperatorNode op, ExpressionNode rhs) */
 Expression
-: Expression TkAnd Relation { $$ = new ExpressionNode((ExpressionNode)$1, new OperatorNode(Operator.And, Lexer.CurrentToken), (ExpressionNode)$3); }
-| Expression TkOr Relation { $$ = new ExpressionNode((ExpressionNode)$1, new OperatorNode(Operator.Or, Lexer.CurrentToken), (ExpressionNode)$3); }
-| Expression TkXor Relation { $$ = new ExpressionNode((ExpressionNode)$1, new OperatorNode(Operator.Xor, Lexer.CurrentToken), (ExpressionNode)$3); }
+: Expression TkAnd Relation { $$ = new ExpressionNode((ExpressionNode)$1, new OperatorNode(Operator.And, Lexer.ProgramTokenByLocation[@2]), (ExpressionNode)$3); }
+| Expression TkOr Relation { $$ = new ExpressionNode((ExpressionNode)$1, new OperatorNode(Operator.Or, Lexer.ProgramTokenByLocation[@2]), (ExpressionNode)$3); }
+| Expression TkXor Relation { $$ = new ExpressionNode((ExpressionNode)$1, new OperatorNode(Operator.Xor, Lexer.ProgramTokenByLocation[@2]), (ExpressionNode)$3); }
 | Relation { $$ = $1; }
 ;
 
 /* RelationNode(ExpressionNode lhs, OperatorNode op, ExpressionNode rhs) */
 Relation
-: Simple TkLess Simple { $$ = new RelationNode((ExpressionNode)$1, new OperatorNode(Operator.Less, Lexer.CurrentToken), (ExpressionNode)$3); }
-| Simple TkLeq Simple { $$ = new RelationNode((ExpressionNode)$1, new OperatorNode(Operator.LessOrEqual, Lexer.CurrentToken), (ExpressionNode)$3); }
-| Simple TkGreater Simple { $$ = new RelationNode((ExpressionNode)$1, new OperatorNode(Operator.Greater, Lexer.CurrentToken), (ExpressionNode)$3); }
-| Simple TkGeq Simple { $$ = new RelationNode((ExpressionNode)$1, new OperatorNode(Operator.GreaterOrEqual, Lexer.CurrentToken), (ExpressionNode)$3); }
-| Simple TkEqual Simple { $$ = new RelationNode((ExpressionNode)$1, new OperatorNode(Operator.Equal, Lexer.CurrentToken), (ExpressionNode)$3); }
-| Simple TkNotEqual Simple { $$ = new RelationNode((ExpressionNode)$1, new OperatorNode(Operator.NotEqual, Lexer.CurrentToken), (ExpressionNode)$3); }
+: Simple TkLess Simple { $$ = new RelationNode((ExpressionNode)$1, new OperatorNode(Operator.Less, Lexer.ProgramTokenByLocation[@2]), (ExpressionNode)$3); }
+| Simple TkLeq Simple { $$ = new RelationNode((ExpressionNode)$1, new OperatorNode(Operator.LessOrEqual, Lexer.ProgramTokenByLocation[@2]), (ExpressionNode)$3); }
+| Simple TkGreater Simple { $$ = new RelationNode((ExpressionNode)$1, new OperatorNode(Operator.Greater, Lexer.ProgramTokenByLocation[@2]), (ExpressionNode)$3); }
+| Simple TkGeq Simple { $$ = new RelationNode((ExpressionNode)$1, new OperatorNode(Operator.GreaterOrEqual, Lexer.ProgramTokenByLocation[@2]), (ExpressionNode)$3); }
+| Simple TkEqual Simple { $$ = new RelationNode((ExpressionNode)$1, new OperatorNode(Operator.Equal, Lexer.ProgramTokenByLocation[@2]), (ExpressionNode)$3); }
+| Simple TkNotEqual Simple { $$ = new RelationNode((ExpressionNode)$1, new OperatorNode(Operator.NotEqual, Lexer.ProgramTokenByLocation[@2]), (ExpressionNode)$3); }
 | Simple { $$ = $1; }
 ;
 
 /* SimpleNode(ExpressionNode lhs, OperatorNode op, ExpressionNode rhs) */
 Simple
-: Simple TkMultiply Factor { $$ = new SimpleNode((ExpressionNode)$1, new OperatorNode(Operator.Multiply, Lexer.CurrentToken), (ExpressionNode)$3); }
-| Simple TkDivide Factor { $$ = new SimpleNode((ExpressionNode)$1, new OperatorNode(Operator.Divide, Lexer.CurrentToken), (ExpressionNode)$3); }
-| Simple TkPercent Factor { $$ = new SimpleNode((ExpressionNode)$1, new OperatorNode(Operator.Modulo, Lexer.CurrentToken), (ExpressionNode)$3); }
+: Simple TkMultiply Factor { $$ = new SimpleNode((ExpressionNode)$1, new OperatorNode(Operator.Multiply, Lexer.ProgramTokenByLocation[@2]), (ExpressionNode)$3); }
+| Simple TkDivide Factor { $$ = new SimpleNode((ExpressionNode)$1, new OperatorNode(Operator.Divide, Lexer.ProgramTokenByLocation[@2]), (ExpressionNode)$3); }
+| Simple TkPercent Factor { $$ = new SimpleNode((ExpressionNode)$1, new OperatorNode(Operator.Modulo, Lexer.ProgramTokenByLocation[@2]), (ExpressionNode)$3); }
 | Factor { $$ = $1; }
 ;
 
 /* FactorNode(ExpressionNode lhs, OperatorNode op, ExpressionNode rhs) */
 Factor
-: Factor TkMinus Summand { $$ = new FactorNode((ExpressionNode)$1, new OperatorNode(Operator.Minus, Lexer.CurrentToken), (ExpressionNode)$3); }
-| Factor TkPlus Summand { $$ = new FactorNode((ExpressionNode)$1, new OperatorNode(Operator.Plus, Lexer.CurrentToken), (ExpressionNode)$3); }
+: Factor TkMinus Summand { $$ = new FactorNode((ExpressionNode)$1, new OperatorNode(Operator.Minus, Lexer.ProgramTokenByLocation[@2]), (ExpressionNode)$3); }
+| Factor TkPlus Summand { $$ = new FactorNode((ExpressionNode)$1, new OperatorNode(Operator.Plus, Lexer.ProgramTokenByLocation[@2]), (ExpressionNode)$3); }
 | Summand { $$ = $1; }
 ;
 
@@ -272,9 +272,9 @@ Summand
 ;
 
 Primary
-: TkIntLiteral { $$ = new LiteralNode(LiteralKind.Integer, Lexer.CurrentToken); }
-| TkRealLiteral { $$ = new LiteralNode(LiteralKind.Real, Lexer.CurrentToken); }
-| TkBoolLiteral { $$ = new LiteralNode(LiteralKind.Boolean, Lexer.CurrentToken); }
+: TkIntLiteral { $$ = new LiteralNode(LiteralKind.Integer, Lexer.ProgramTokenByLocation[@1]); }
+| TkRealLiteral { $$ = new LiteralNode(LiteralKind.Real, Lexer.ProgramTokenByLocation[@1]); }
+| TkBoolLiteral { $$ = new LiteralNode(LiteralKind.Boolean, Lexer.ProgramTokenByLocation[@1]); }
 | ModifiablePrimary
 ;
 
@@ -286,7 +286,7 @@ ModifiablePrimary
 ;
 
 Identifier
-: TkIdentifier { $$ = new IdentifierNode(Lexer.CurrentToken); }
+: TkIdentifier { $$ = new IdentifierNode(Lexer.ProgramTokenByLocation[@1]); }
 ;
 
 %%
