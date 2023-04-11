@@ -1,5 +1,6 @@
 using Compiler.CodeAnalysis.LexerTokens;
 using Compiler.CodeAnalysis.SyntaxAnalysis;
+using Compiler.Utils;
 
 namespace Compiler.CodeAnalysis.Typechecker;
 
@@ -40,8 +41,6 @@ public class Visitskel
         {
             returnType = null;
         }
-        Console.Write("Return type: ");
-        Console.WriteLine(returnType);
 
         // Body
         BodyVisitor(decl.Body, childContext, true);
@@ -52,8 +51,8 @@ public class Visitskel
     public void DeclParamVisitor(ParameterDeclarationNode param, Context context)
     {
         var name = param.Identifier.Token as IdentifierTk;
-        var type = param.Type.Kind;
-        context.add(name.value, param.Type);
+        var type = param.Type.Kind.GetDescription();
+        context.add(name.value, type);
     }
 
     public void BodyVisitor(BodyNode body, Context context, Boolean reversedIteration = false)
@@ -101,8 +100,28 @@ public class Visitskel
     }
     
     public void ReturnVisitor(ReturnNode returnStatement, Context context) {}
-    
-    public void VariableDeclVisitor(VariableDeclarationNode variable, Context context) {}
+
+    public void VariableDeclVisitor(VariableDeclarationNode variable, Context context)
+    {
+        var identifier = variable.Identifier.Token as IdentifierTk;
+        String? type = null;
+        switch (variable.Expression)
+        {
+            case LiteralNode node:
+                type = LiteralNodeVisitor(node, context);
+                break;
+            case FactorNode node:
+                type = FactorNodeVisitor(node, context);
+                break;
+            case ModifiablePrimaryNode node:
+                type = ModifiablePrimaryNodeVisitor(node, context);
+                break;
+        }
+
+        if (type is null) throw new Exception("error");
+        context.add(identifier.value, type);
+        return;
+    }
     
     public void AssigmentVisitor(AssignmentNode assigment, Context context) {}
 
@@ -128,4 +147,71 @@ public class Visitskel
     public void WhileLoopVisitor(WhileLoopNode loop, Context context) {}
     
     public void RoutineCallVisitor(RoutineCallNode call, Context context) {}
+
+    public String? LiteralNodeVisitor(LiteralNode expr, Context context)
+    {
+        var type = expr.Kind;
+        switch (type)
+        {
+            case null:
+                context.addError($"Type is null at {expr.Token.Span!.StartColumn} {expr.Token.Span.StartLine} end at {expr.Token.Span.EndColumn} {expr.Token.Span.EndLine}");
+                break;
+        }
+        return expr.Kind.GetDescription() ?? throw new InvalidOperationException();
+    }
+
+    public String? FactorNodeVisitor(FactorNode expr, Context context)
+    {
+        String? type = null;
+
+        object? lhs = expr.Lhs switch
+        {
+            FactorNode node => FactorNodeVisitor(node, context),
+            LiteralNode node => LiteralNodeVisitor(node, context),
+            ModifiablePrimaryNode node => ModifiablePrimaryNodeVisitor(node, context),
+            _ => null
+        };
+
+        String? operator_ = expr.Operator switch
+        {
+            OperatorNode node => node.Kind.GetDescription().Split(" ")[0],
+            _ => null
+        };
+        
+        object? rhs = expr.Rhs switch
+        {
+            FactorNode node => FactorNodeVisitor(node, context),
+            LiteralNode node => LiteralNodeVisitor(node, context),
+            ModifiablePrimaryNode node => ModifiablePrimaryNodeVisitor(node, context),
+            _ => null
+        };
+
+        if (rhs == null && operator_ == null)
+        {
+            return (string?)lhs;
+        }
+
+        if (((string)lhs! == (string)rhs!) && operator_ is "+" or "-")
+        {
+            return (string)lhs!;
+        }
+        context.addError($"Incorrect type at factor node");
+        return null;
+    }
+
+    public String? ModifiablePrimaryNodeVisitor(ModifiablePrimaryNode expr, Context context)
+    {
+        switch (expr.Identifier.Token)
+        {
+            case IdentifierTk ident:
+                return context.get(ident.value);
+        }
+        context.addError($"Variable doesnt exist at {expr.Identifier.Token.Span!.StartLine} {expr.Identifier.Token.Span!.StartColumn} {expr.Identifier.Token.Span!.EndLine} {expr.Identifier.Token.Span!.EndColumn}");
+        return null;
+    }
+
+    public void ExpressionNodeVisitor()
+    {
+        return;
+    }
 }

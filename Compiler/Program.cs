@@ -7,43 +7,45 @@ using Newtonsoft.Json;
 
 // Doesn't work:
 // function calls
-const string program = @"
-routine example(a: integer, b: integer): integer is
-    var d is 1;
-
-    for i in 1 .. a + 1 loop
-        if a % i = 0 and b % i = 0 then
-            d := i;
-        else
-            d := d + 1;
-        end;
-    end;
-
-    return d;
-end;
-
-routine main(a: integer): integer is
-    var d is a + 1 * 10 / 100;
-    return c;
-end;
-";
+// const string program = @"
+// routine example(a: integer, b: integer): integer is
+//     var d is 1;
+//      
+//     for i in 1 .. a + 1 loop
+//         if a % i = 0 and b % i = 0 then
+//             d := i;
+//         else
+//             d := d + 1;
+//         end;
+//     end;
+//
+//     return d;
+// end;
+//
+// routine main(a: integer): integer is
+//     var d is a + 1 * 10 / 100;
+//     return c;
+// end;
+// ";
 
 
 
 // const string program = @"
 // var a is 1+2;
 // ";
-// const string program = @"
-// routine SumOfArray ( arr : array[] integer ) : integer is
-//     var sum is 0;
-//
-//     for i in 0 .. arr.Length loop
-//         sum := i + 1;
-//     end;
-//
-//     return sum;
-// end;
-// ";
+const string program = @"
+routine SumOfArray ( arr : array[] integer ) : integer is
+    var sum is 0;
+    var check is 0+2+2;
+    var pup is sum;
+    var pup1 is sum+1;
+    for i in 0 .. arr.Length loop
+        sum := i + 1;
+    end;
+
+    return sum;
+end;
+";
 // const string program = @"
 // print(42);
 // ";

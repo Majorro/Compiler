@@ -13,6 +13,13 @@ public static class Typecheck
 
         var visit = new Visitskel();
         var context = new Context(null);
-        visit.ProgramVisitor(program.Tree.Root,context);
+        try
+        {
+            visit.ProgramVisitor(program.Tree.Root, context);
+        }
+        catch (Exception exception)
+        {
+            Console.WriteLine(string.Join("\n", context.getErrors()));
+        }
     }
 }
