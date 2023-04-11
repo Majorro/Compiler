@@ -45,7 +45,7 @@ public class Visitskel
         Console.WriteLine(returnType);
 
         // Body - reversed iterating
-        for (int i = decl.Body.Items.Count - 1; i >= 0; i--)
+        for (var i = decl.Body.Items.Count - 1; i >= 0; i--)
         {
             switch (decl.Body.Items[i])
             {
@@ -90,4 +90,16 @@ public class Visitskel
         var type = param.Type.Kind;
         context.addStelladient(name.value, param.Type);
     }
+    
+    public void VariableDeclVisitor(VariableDeclarationNode variable, Context context) {}
+    
+    public void AssigmentVisitor(AssignmentNode assigment, Context context) {}
+    
+    public void IfVisitor(IfNode ifCondition, Context context) {}
+    
+    public void ForLoopVisitor(ForLoopNode loop, Context context) {}
+    
+    public void WhileLoopVisitor(WhileLoopNode loop, Context context) {}
+    
+    public void RoutineCallVisitor(RoutineCallNode call, Context context) {}
 }
