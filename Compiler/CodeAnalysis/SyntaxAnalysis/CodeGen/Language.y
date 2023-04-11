@@ -1,6 +1,5 @@
 %namespace Compiler.CodeAnalysis.SyntaxAnalysis
 %output=Parser.cs
-%using Compiler.CodeAnalysis.LexerTokens;
 %partial
 %start Program
 
@@ -233,45 +232,43 @@ ReturnStatement
 | TkReturn { $$ = new ReturnNode(); }
 ;
 
-/* ExpressionNode(ExpressionNode? lhs, OperatorNode? op, RelationNode rhs) */
+/* ExpressionNode(ExpressionNode lhs, OperatorNode op, ExpressionNode rhs) */
 Expression
-: Expression TkAnd Relation { $$ = new ExpressionNode((ExpressionNode)$1, new OperatorNode(Operator.And, Lexer.CurrentToken), (RelationNode)$3); }
-| Expression TkOr Relation { $$ = new ExpressionNode((ExpressionNode)$1, new OperatorNode(Operator.Or, Lexer.CurrentToken), (RelationNode)$3); }
-| Expression TkXor Relation { $$ = new ExpressionNode((ExpressionNode)$1, new OperatorNode(Operator.Xor, Lexer.CurrentToken), (RelationNode)$3); }
-| Relation { $$ = new ExpressionNode(null, null, (RelationNode)$1); }
+: Expression TkAnd Relation { $$ = new ExpressionNode((ExpressionNode)$1, new OperatorNode(Operator.And, Lexer.CurrentToken), (ExpressionNode)$3); }
+| Expression TkOr Relation { $$ = new ExpressionNode((ExpressionNode)$1, new OperatorNode(Operator.Or, Lexer.CurrentToken), (ExpressionNode)$3); }
+| Expression TkXor Relation { $$ = new ExpressionNode((ExpressionNode)$1, new OperatorNode(Operator.Xor, Lexer.CurrentToken), (ExpressionNode)$3); }
+| Relation { $$ = $1; }
 ;
 
-/* RelationNode(RelationNode? lhs, OperatorNode? op, SimpleNode rhs) */
+/* RelationNode(ExpressionNode lhs, OperatorNode op, ExpressionNode rhs) */
 Relation
-: Simple TkLess Simple { $$ = new RelationNode((SimpleNode)$1, new OperatorNode(Operator.Less, Lexer.CurrentToken), (SimpleNode)$3); }
-| Simple TkLeq Simple { $$ = new RelationNode((SimpleNode)$1, new OperatorNode(Operator.LessOrEqual, Lexer.CurrentToken), (SimpleNode)$3); }
-| Simple TkGreater Simple { $$ = new RelationNode((SimpleNode)$1, new OperatorNode(Operator.Greater, Lexer.CurrentToken), (SimpleNode)$3); }
-| Simple TkGeq Simple { $$ = new RelationNode((SimpleNode)$1, new OperatorNode(Operator.GreaterOrEqual, Lexer.CurrentToken), (SimpleNode)$3); }
-| Simple TkEqual Simple { $$ = new RelationNode((SimpleNode)$1, new OperatorNode(Operator.Equal, Lexer.CurrentToken), (SimpleNode)$3); }
-| Simple TkNotEqual Simple { $$ = new RelationNode((SimpleNode)$1, new OperatorNode(Operator.NotEqual, Lexer.CurrentToken), (SimpleNode)$3); }
-| Simple { $$ = new RelationNode(null, null, (SimpleNode)$1); }
+: Simple TkLess Simple { $$ = new RelationNode((ExpressionNode)$1, new OperatorNode(Operator.Less, Lexer.CurrentToken), (ExpressionNode)$3); }
+| Simple TkLeq Simple { $$ = new RelationNode((ExpressionNode)$1, new OperatorNode(Operator.LessOrEqual, Lexer.CurrentToken), (ExpressionNode)$3); }
+| Simple TkGreater Simple { $$ = new RelationNode((ExpressionNode)$1, new OperatorNode(Operator.Greater, Lexer.CurrentToken), (ExpressionNode)$3); }
+| Simple TkGeq Simple { $$ = new RelationNode((ExpressionNode)$1, new OperatorNode(Operator.GreaterOrEqual, Lexer.CurrentToken), (ExpressionNode)$3); }
+| Simple TkEqual Simple { $$ = new RelationNode((ExpressionNode)$1, new OperatorNode(Operator.Equal, Lexer.CurrentToken), (ExpressionNode)$3); }
+| Simple TkNotEqual Simple { $$ = new RelationNode((ExpressionNode)$1, new OperatorNode(Operator.NotEqual, Lexer.CurrentToken), (ExpressionNode)$3); }
+| Simple { $$ = $1; }
 ;
 
-/* SimpleNode(SimpleNode? lhs, OperatorNode? op, FactorNode rhs) */
+/* SimpleNode(ExpressionNode lhs, OperatorNode op, ExpressionNode rhs) */
 Simple
-: Simple TkMultiply Factor { $$ = new SimpleNode((SimpleNode)$1, new OperatorNode(Operator.Multiply, Lexer.CurrentToken), (FactorNode)$3); }
-| Simple TkDivide Factor { $$ = new SimpleNode((SimpleNode)$1, new OperatorNode(Operator.Divide, Lexer.CurrentToken), (FactorNode)$3); }
-| Simple TkPercent Factor { $$ = new SimpleNode((SimpleNode)$1, new OperatorNode(Operator.Modulo, Lexer.CurrentToken), (FactorNode)$3); }
-| Factor { $$ = new SimpleNode(null, null, (FactorNode)$1); }
+: Simple TkMultiply Factor { $$ = new SimpleNode((ExpressionNode)$1, new OperatorNode(Operator.Multiply, Lexer.CurrentToken), (ExpressionNode)$3); }
+| Simple TkDivide Factor { $$ = new SimpleNode((ExpressionNode)$1, new OperatorNode(Operator.Divide, Lexer.CurrentToken), (ExpressionNode)$3); }
+| Simple TkPercent Factor { $$ = new SimpleNode((ExpressionNode)$1, new OperatorNode(Operator.Modulo, Lexer.CurrentToken), (ExpressionNode)$3); }
+| Factor { $$ = $1; }
 ;
 
-/* FactorNode(FactorNode? lhs, OperatorNode? op, SummandNode rhs) */
+/* FactorNode(ExpressionNode lhs, OperatorNode op, ExpressionNode rhs) */
 Factor
-: Factor TkMinus Summand { $$ = new FactorNode((FactorNode)$1, new OperatorNode(Operator.Minus, Lexer.CurrentToken), (SummandNode)$3); }
-| Factor TkPlus Summand { $$ = new FactorNode((FactorNode)$1, new OperatorNode(Operator.Plus, Lexer.CurrentToken), (SummandNode)$3); }
-| Summand { $$ = new FactorNode(null, null, (SummandNode)$1); }
+: Factor TkMinus Summand { $$ = new FactorNode((ExpressionNode)$1, new OperatorNode(Operator.Minus, Lexer.CurrentToken), (ExpressionNode)$3); }
+| Factor TkPlus Summand { $$ = new FactorNode((ExpressionNode)$1, new OperatorNode(Operator.Plus, Lexer.CurrentToken), (ExpressionNode)$3); }
+| Summand { $$ = $1; }
 ;
 
-
-/* SummandNode(PrimaryNode? primary, ExpressionNode? expression) */
 Summand
-: Primary { $$ = new SummandNode((PrimaryNode)$1); }
-| Expression { $$ = new SummandNode(null, (ExpressionNode)$1); }
+: Primary { $$ = $1; }
+| TkRoundOpen Expression TkRoundClose { $$ = $2; }
 ;
 
 Primary
@@ -286,7 +283,6 @@ ModifiablePrimary
 : ModifiablePrimary TkDot Identifier { $$ = new ModifiablePrimaryNode((IdentifierNode)$3, (ModifiablePrimaryNode)$1); }
 | ModifiablePrimary TkSquareOpen Expression TkSquareClose { $$ = new ModifiablePrimaryNode(null, (ModifiablePrimaryNode)$1, (ExpressionNode)$3); }
 | Identifier { $$ = new ModifiablePrimaryNode((IdentifierNode)$1); }
-// | RoutineCall
 ;
 
 Identifier

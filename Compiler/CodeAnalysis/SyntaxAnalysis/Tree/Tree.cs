@@ -341,7 +341,7 @@ namespace Compiler.CodeAnalysis.SyntaxAnalysis
     {
         public ExpressionNode? Expression { get; }
 
-        public override IEnumerable<Node?> GetChildren() =>
+        public override IEnumerable<Node> GetChildren() =>
             GetChildren(null, Expression);
 
         public ReturnNode(ExpressionNode? expression = null) => Expression = expression;
@@ -351,12 +351,15 @@ namespace Compiler.CodeAnalysis.SyntaxAnalysis
     {
         public ExpressionNode? Lhs { get; }
         public OperatorNode? Operator { get; }
-        public RelationNode Rhs { get; }
+        public ExpressionNode? Rhs { get; }
 
         public override IEnumerable<Node> GetChildren() =>
             GetChildren(null, Lhs, Operator, Rhs);
 
-        public ExpressionNode(ExpressionNode? lhs, OperatorNode? op, RelationNode rhs)
+        protected ExpressionNode()
+        { }
+
+        public ExpressionNode(ExpressionNode lhs, OperatorNode op, ExpressionNode rhs)
         {
             Lhs = lhs;
             Operator = op;
@@ -364,78 +367,28 @@ namespace Compiler.CodeAnalysis.SyntaxAnalysis
         }
     }
 
-    public class RelationNode : Node
+    public class RelationNode : ExpressionNode
     {
-        public SimpleNode? Lhs { get; }
-        public OperatorNode? Operator { get; }
-        public SimpleNode Rhs { get; }
-
-        public override IEnumerable<Node> GetChildren() =>
-            GetChildren(null, Lhs, Operator, Rhs);
-
-        public RelationNode(SimpleNode? lhs, OperatorNode? op, SimpleNode rhs)
-        {
-            Lhs = lhs;
-            Operator = op;
-            Rhs = rhs;
-        }
+        public RelationNode(ExpressionNode lhs, OperatorNode op, ExpressionNode rhs)
+            : base(lhs, op, rhs)
+        { }
     }
 
-    public class SimpleNode : Node
+    public class SimpleNode : ExpressionNode
     {
-        public SimpleNode? Lhs { get; }
-        public OperatorNode? Operator { get; }
-        public FactorNode Rhs { get; }
-
-        public override IEnumerable<Node> GetChildren() =>
-            GetChildren(null, Lhs, Operator, Rhs);
-
-        public SimpleNode(SimpleNode? lhs, OperatorNode? op, FactorNode rhs)
-        {
-            Lhs = lhs;
-            Operator = op;
-            Rhs = rhs;
-        }
+        public SimpleNode(ExpressionNode lhs, OperatorNode op, ExpressionNode rhs)
+            : base(lhs, op, rhs)
+        { }
     }
 
-    public class FactorNode : Node
+    public class FactorNode : ExpressionNode
     {
-        public FactorNode? Lhs { get; }
-        public OperatorNode? Operator { get; }
-        public SummandNode Rhs { get; }
-
-        public override IEnumerable<Node> GetChildren() =>
-            GetChildren(null, Lhs, Operator, Rhs);
-
-        public FactorNode(FactorNode? lhs, OperatorNode? op, SummandNode rhs)
-        {
-            Lhs = lhs;
-            Operator = op;
-            Rhs = rhs;
-        }
+        public FactorNode(ExpressionNode lhs, OperatorNode op, ExpressionNode rhs)
+            : base(lhs, op, rhs)
+        { }
     }
 
-    public class SummandNode : Node
-    {
-        public bool IsPrimary { get; }
-        public PrimaryNode? Primary { get; }
-        public ExpressionNode? Expression { get; }
-
-        public override IEnumerable<Node> GetChildren() =>
-            GetChildren(null, Primary, Expression);
-
-        public SummandNode(PrimaryNode? primary, ExpressionNode? expression = null)
-        {
-            if (primary == null && expression == null)
-                throw new ArgumentException("Primary and expression cannot both be null");
-
-            IsPrimary = primary != null;
-            Primary = primary;
-            Expression = expression;
-        }
-    }
-
-    public abstract class PrimaryNode : Node
+    public abstract class PrimaryNode : ExpressionNode
     { }
 
     public enum LiteralKind
