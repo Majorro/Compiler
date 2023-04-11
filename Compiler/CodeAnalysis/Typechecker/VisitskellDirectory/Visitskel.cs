@@ -12,6 +12,8 @@ public class Visitskel
             switch (routine)
             {
                 case RoutineDeclarationNode node:
+                    Console.WriteLine("New routine!");
+                    Console.WriteLine(routine);
                     DeclVisitor(node, context);
                     break;
             }
@@ -21,12 +23,14 @@ public class Visitskel
 
     public object DeclVisitor(RoutineDeclarationNode decl, Context context)
     {
+        // Parameters
         var childContext = new Context(context);
         foreach (var param in decl.Parameters)
         {
             DeclParamVisitor(param, childContext);
         }
 
+        // Return type
         object? returnType;
         
         if (decl.ReturnType != null)
@@ -37,7 +41,46 @@ public class Visitskel
         {
             returnType = null;
         }
+        Console.Write("Return type: ");
         Console.WriteLine(returnType);
+
+        // Body - reversed iterating
+        for (int i = decl.Body.Items.Count - 1; i >= 0; i--)
+        {
+            switch (decl.Body.Items[i])
+            {
+                case ReturnNode node:
+                    //Console.WriteLine("New ReturnNode");
+                    //Console.WriteLine(node);
+                    break;
+                
+                case VariableDeclarationNode node:
+                    //Console.WriteLine("New VariableDeclarationNode");
+                    //Console.WriteLine(node);
+                    break;
+                
+                case IfNode node:
+                    //Console.WriteLine("New IfNode");
+                    //Console.WriteLine(node);
+                    break;
+                    
+                case ForLoopNode node:
+                    //Console.WriteLine("New ForLoopNode");
+                    //Console.WriteLine(node);
+                    break;
+                
+                case WhileLoopNode node:
+                    break;
+                
+                case AssignmentNode node:
+                    break;
+                
+                // Doesn't work
+                case RoutineCallNode node:
+                    break;
+            }
+        }
+        
         return null;
     }
 

@@ -4,7 +4,7 @@ namespace Compiler.CodeAnalysis.Typechecker;
 
 public static class Typecheck
 {
-    public static void typecheckProgramm(Parser program)
+    public static void typecheckProgram(Parser program)
     {
         if (program.Tree == null)
         {
