@@ -9,21 +9,34 @@ public class Visitskel
     {
         foreach (var routine in program.DeclarationList)
         {
-            var routine_ = routine as RoutineDeclarationNode;
-            DeclVisitor(routine_, context);
+            switch (routine)
+            {
+                case RoutineDeclarationNode node:
+                    DeclVisitor(node, context);
+                    break;
+            }
         }
         return;
     }
 
     public object DeclVisitor(RoutineDeclarationNode decl, Context context)
     {
-        var child_context = new Context(context);
+        var childContext = new Context(context);
         foreach (var param in decl.Parameters)
         {
-            DeclParamVisitor(param, child_context);
+            DeclParamVisitor(param, childContext);
         }
 
-        var returnType = decl.ReturnType.Kind;
+        object? returnType;
+        
+        if (decl.ReturnType != null)
+        {
+            returnType = decl.ReturnType.Kind;
+        }
+        else
+        {
+            returnType = null;
+        }
         Console.WriteLine(returnType);
         return null;
     }

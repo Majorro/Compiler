@@ -7,9 +7,8 @@ using Newtonsoft.Json;
 
 
 const string program = @"
-routine main(): integer is
-    var b = 2;
-    return b;
+routine main(a: integer): integer is
+    var b is 2;
 end;
 ";
 
