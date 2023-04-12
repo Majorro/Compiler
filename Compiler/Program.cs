@@ -33,19 +33,30 @@ using Newtonsoft.Json;
 // const string program = @"
 // var a is 1+2;
 // ";
-const string program = @"
-routine SumOfArray ( arr : array[] integer ) : integer is
-    var sum is 0;
-    var check is 0+2+2;
-    var pup is sum;
-    var pup1 is sum+1;
-    for i in 0 .. arr.Length loop
-        sum := i + 1;
-    end;
+// const string program = @"
+// routine SumOfArray ( arr : array[] integer ) : integer is
+//     var sum is 0;
+//     var check is 0+2+2;
+//     var pup is sum;
+//     var pup1 is sum+1;
+//     for i in 0 .. arr.Length loop
+//         sum := i + 2;
+//     end;
+//
+//     return sum;
+// end;
+// ";
 
-    return sum;
-end;
-";
+// const string checkProgram = @"
+// routine SumFunction (a: integer, b: integer): integer is
+//     return a + b;
+// end;
+//
+// routine SumOfArray (a: integer, b: integer ): integer is
+//     SumFunction(a,b);
+//     return 1;
+// end;
+// ";
 // const string program = @"
 // print(42);
 // ";
@@ -63,6 +74,24 @@ end;
 // ";
 
 // program = @"2a int";
+
+
+const string program = @"
+routine factorial(n: integer): bool is
+    if n /= 1 then
+        var a is n * factorial(n - 1);
+        return a;
+    else
+        return 1;
+    end;
+end;
+
+routine main(): integer is
+    factorial(5);
+    return 1;
+end;";
+
+
 
 // PrintTokens(program);
 PrintAst(program);

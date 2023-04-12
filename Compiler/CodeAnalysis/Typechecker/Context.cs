@@ -7,6 +7,7 @@ public class Context
     public Context? parent_context;
     public Dictionary<String, String> scope = new Dictionary<string, string>();
     public List<String> errors;
+    public Dictionary<String, String> routines = new Dictionary<string, string>();
 
     public Context(Context? context)
     {
@@ -17,6 +18,16 @@ public class Context
         }
     }
 
+    public void addRoutine(String name, String parameters)
+    {
+        routines[name] = parameters;
+    }
+
+    public String? getParameters(String name)
+    {
+        return routines.TryGetValue(name, out var value) ? value : parent_context?.getParameters(name);
+    }
+
     public void add(String name, String type)
     {
         scope[name] = type;
@@ -24,13 +35,7 @@ public class Context
 
     public String? get(String name)
     {
-        var type = scope[name];
-        if (type != null) return type;
-        if (parent_context != null)
-        {
-            type = parent_context.get(name);    
-        }
-        return type;
+        return scope.TryGetValue(name, out var value) ? value : parent_context?.get(name);
     }
 
     public void addError(String error)
