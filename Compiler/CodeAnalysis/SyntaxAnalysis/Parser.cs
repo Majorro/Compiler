@@ -1,5 +1,4 @@
-﻿using Microsoft.Win32.SafeHandles;
-using QUT.Gppg;
+﻿using QUT.Gppg;
 
 namespace Compiler.CodeAnalysis.SyntaxAnalysis;
 

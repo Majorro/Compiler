@@ -232,16 +232,16 @@ namespace Compiler.CodeAnalysis.SyntaxAnalysis
             : base(declaration, remaining)
         { }
 
-        public BodyNode(StatementNode statement, BodyNode? remaining)
+        public BodyNode(Node statement, BodyNode? remaining) // statement is IStatementNode
             : base(statement, remaining)
         { }
     }
 
-    public abstract class StatementNode : Node
+    public interface IStatementNode
     {
     }
 
-    public class AssignmentNode : StatementNode
+    public class AssignmentNode : Node, IStatementNode
     {
         public ModifiablePrimaryNode Identifier { get; }
         public ExpressionNode Expression { get; }
@@ -256,7 +256,7 @@ namespace Compiler.CodeAnalysis.SyntaxAnalysis
         }
     }
 
-    public class RoutineCallNode : StatementNode
+    public class RoutineCallNode : PrimaryNode, IStatementNode
     {
         public IdentifierNode RoutineIdentifier { get; }
         public List<ExpressionNode> Arguments { get; }
@@ -271,7 +271,7 @@ namespace Compiler.CodeAnalysis.SyntaxAnalysis
         }
     }
 
-    public class WhileLoopNode : StatementNode
+    public class WhileLoopNode : Node, IStatementNode
     {
         public ExpressionNode Condition { get; }
         public BodyNode Body { get; }
@@ -286,7 +286,7 @@ namespace Compiler.CodeAnalysis.SyntaxAnalysis
         }
     }
 
-    public class ForLoopNode : StatementNode
+    public class ForLoopNode : Node, IStatementNode
     {
         public IdentifierNode VariableIdentifier { get; }
         public RangeNode Range { get; }
@@ -320,7 +320,7 @@ namespace Compiler.CodeAnalysis.SyntaxAnalysis
         }
     }
 
-    public class IfNode : StatementNode
+    public class IfNode : Node, IStatementNode
     {
         public ExpressionNode Condition { get; }
         public BodyNode ThenBody { get; }
@@ -337,7 +337,7 @@ namespace Compiler.CodeAnalysis.SyntaxAnalysis
         }
     }
 
-    public class ReturnNode : StatementNode
+    public class ReturnNode : Node, IStatementNode
     {
         public ExpressionNode? Expression { get; }
 

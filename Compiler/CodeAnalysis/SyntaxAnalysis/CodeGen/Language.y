@@ -136,6 +136,7 @@ RoutineDeclaration
 Parameters
 : ParameterDeclaration TkComma Parameters { $$ = new ListNode<ParameterDeclarationNode>((ParameterDeclarationNode)$1, (ListNode<ParameterDeclarationNode>?)$3); }
 | ParameterDeclaration { $$ = new ListNode<ParameterDeclarationNode>((ParameterDeclarationNode)$1, null); }
+| /* empty */ { $$ = new ListNode<ParameterDeclarationNode>(); }
 ;
 
 /* ParameterDeclarationNode(IdentifierNode identifier, TypeNode type) */
@@ -169,12 +170,12 @@ ArrayType
 ;
 
 /* BodyNode(SimpleDeclarationNode declaration, BodyNode? remaining) */
-/* BodyNode(StatementNode statement, BodyNode? remaining) */
+/* BodyNode(Node statement, BodyNode? remaining) */
 Body
 : Body SimpleDeclaration { $$ = new BodyNode((SimpleDeclarationNode)$2, (BodyNode)$1); }
-| Body Statement TkSemicolon { $$ = new BodyNode((StatementNode)$2, (BodyNode)$1); }
+| Body Statement TkSemicolon { $$ = new BodyNode($2, (BodyNode)$1); }
 | SimpleDeclaration { $$ = new BodyNode((SimpleDeclarationNode)$1, null); }
-| Statement TkSemicolon { $$ = new BodyNode((StatementNode)$1, null); }
+| Statement TkSemicolon { $$ = new BodyNode($1, null); }
 ;
 
 Statement
@@ -194,7 +195,7 @@ Assignment
 /* RoutineCallNode(IdentifierNode identifier, ListNode<ExpressionNode> arguments) */
 RoutineCall
 : Identifier TkRoundOpen ExpressionList TkRoundClose { $$ = new RoutineCallNode((IdentifierNode)$1, (ListNode<ExpressionNode>)$3); }
-| Identifier { $$ = new RoutineCallNode((IdentifierNode)$1, new ListNode<ExpressionNode>()); }
+| Identifier TkRoundOpen TkRoundClose { $$ = new RoutineCallNode((IdentifierNode)$1, new ListNode<ExpressionNode>()); }
 ;
 
 /* ListNode<T>(T item, ListNode<T>? items) */
@@ -274,6 +275,7 @@ Primary
 : TkIntLiteral { $$ = new LiteralNode(LiteralKind.Integer, Lexer.ProgramTokenByLocation[@1]); }
 | TkRealLiteral { $$ = new LiteralNode(LiteralKind.Real, Lexer.ProgramTokenByLocation[@1]); }
 | TkBoolLiteral { $$ = new LiteralNode(LiteralKind.Boolean, Lexer.ProgramTokenByLocation[@1]); }
+| RoutineCall
 | ModifiablePrimary
 ;
 

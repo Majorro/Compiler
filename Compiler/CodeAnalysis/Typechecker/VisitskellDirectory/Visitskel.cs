@@ -72,7 +72,7 @@ public class Visitskel
 
             switch (bodyStatement)
             {
-                case StatementNode node:
+                case IStatementNode node:
                     var result = StatementNodeVisitor(node, context);
                     if(result != null) results.Add(result);
                     break;
@@ -327,7 +327,7 @@ public class Visitskel
         }
     }
 
-    public String? StatementNodeVisitor(StatementNode statementNode, Context context)
+    public String? StatementNodeVisitor(IStatementNode statementNode, Context context)
     {
         var child_context = new Context(context);
 
