@@ -47,15 +47,16 @@ public class Lexer : AbstractScanner<Node, LexLocation>
                 else if (Enum.IsDefined(typeof(KeywordTokens), (int)preset) && !char.IsLetter(symbol))
                     token = new EnumeratedTk<KeywordTokens>(preset);
 
-                else if (TokenRegexes.Operators.IsMatch(buffer) && buffer + symbol is not (".." or "//" or "/*"))
+                else if (TokenRegexes.Comparators.IsMatch(buffer))
+                    token = new EnumeratedTk<Comparators>(preset);
+
+                else if (TokenRegexes.Operators.IsMatch(buffer) && buffer + symbol is not (".." or "//" or "/*" or "/="))
                     token = new EnumeratedTk<OperatorTokens>(preset);
 
                 else if (TokenRegexes.Puncuators.IsMatch(buffer) &&
                          !TokenRegexes.Comparators.IsMatch(symbol.ToString()))
                     token = new EnumeratedTk<PunctuatorTokens>(preset);
 
-                else if (TokenRegexes.Comparators.IsMatch(buffer))
-                    token = new EnumeratedTk<Comparators>(preset);
             }
             // Makes literal tokens of types integer and real
             else if (TokenRegexes.Numbers.IsMatch(buffer) &&
@@ -170,7 +171,7 @@ public class Lexer : AbstractScanner<Node, LexLocation>
             "<" => Tokens.TkLess,
             ">" => Tokens.TkGreater,
             "=" => Tokens.TkEqual,
-            "\\=" => Tokens.TkNotEqual,
+            "/=" => Tokens.TkNotEqual,
             _ => Tokens.TkUnknown
         };
     }
