@@ -359,6 +359,12 @@ namespace Compiler.CodeAnalysis.SyntaxAnalysis
         protected ExpressionNode()
         { }
 
+        protected ExpressionNode(OperatorNode op, ExpressionNode rhs)
+        {
+            Operator = op;
+            Rhs = rhs;
+        }
+
         public ExpressionNode(ExpressionNode lhs, OperatorNode op, ExpressionNode rhs)
         {
             Lhs = lhs;
@@ -389,7 +395,21 @@ namespace Compiler.CodeAnalysis.SyntaxAnalysis
     }
 
     public abstract class PrimaryNode : ExpressionNode
-    { }
+    {
+        protected PrimaryNode()
+        { }
+
+        protected PrimaryNode(OperatorNode op, ExpressionNode rhs)
+            : base(op, rhs)
+        {}
+    }
+
+    public class UnaryNode : PrimaryNode
+    {
+        public UnaryNode(OperatorNode op, LiteralNode rhs)
+            : base(op, rhs)
+        { }
+    }
 
     public enum LiteralKind
     {

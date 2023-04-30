@@ -261,8 +261,7 @@ Simple
 
 /* FactorNode(ExpressionNode lhs, OperatorNode op, ExpressionNode rhs) */
 Factor
-: Factor TkMinus Summand { $$ = new FactorNode((ExpressionNode)$1, new OperatorNode(Operator.Minus, Lexer.ProgramTokenByLocation[@2]), (ExpressionNode)$3); }
-| Factor TkPlus Summand { $$ = new FactorNode((ExpressionNode)$1, new OperatorNode(Operator.Plus, Lexer.ProgramTokenByLocation[@2]), (ExpressionNode)$3); }
+: Factor Sign Summand { $$ = new FactorNode((ExpressionNode)$1, (OperatorNode)$2, (ExpressionNode)$3); }
 | Summand { $$ = $1; }
 ;
 
@@ -272,11 +271,22 @@ Summand
 ;
 
 Primary
-: TkIntLiteral { $$ = new LiteralNode(LiteralKind.Integer, Lexer.ProgramTokenByLocation[@1]); }
+: Unary
+| TkIntLiteral { $$ = new LiteralNode(LiteralKind.Integer, Lexer.ProgramTokenByLocation[@1]); }
 | TkRealLiteral { $$ = new LiteralNode(LiteralKind.Real, Lexer.ProgramTokenByLocation[@1]); }
 | TkBoolLiteral { $$ = new LiteralNode(LiteralKind.Boolean, Lexer.ProgramTokenByLocation[@1]); }
 | RoutineCall
 | ModifiablePrimary
+;
+
+Sign
+: TkPlus { $$ = new OperatorNode(Operator.Plus, Lexer.ProgramTokenByLocation[@1]); }
+| TkMinus { $$ = new OperatorNode(Operator.Minus, Lexer.ProgramTokenByLocation[@1]); }
+;
+
+Unary
+: Sign TkIntLiteral { $$ = new UnaryNode((OperatorNode)$1, new LiteralNode(LiteralKind.Integer, Lexer.ProgramTokenByLocation[@2])); }
+| Sign TkRealLiteral { $$ = new UnaryNode((OperatorNode)$1, new LiteralNode(LiteralKind.Real, Lexer.ProgramTokenByLocation[@2])); }
 ;
 
 /* ModifiablePrimaryNode(IdentifierNode identifier, ModifiablePrimaryNode? prev, ExpressionNode? index) */
