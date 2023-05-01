@@ -28,6 +28,10 @@ public abstract class Node
         .Select(c => c!)
         .ToList();
 
+    public IEnumerable<T> GetChildren<T>()
+        where T : Node =>
+        GetChildren().Where(x => x is T).Cast<T>();
+
     public override string ToString() => ToString(new StringBuilder(), true, string.Empty).ToString();
 
     private StringBuilder ToString(StringBuilder builder, bool isLast, string indent)

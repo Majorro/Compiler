@@ -1,6 +1,3 @@
-﻿using Compiler.Core;
-
-const string program = @"
 routine factorial(n: integer): boolean is
     if n /= 1 then
         var a is n * factorial(n - 1);
@@ -13,6 +10,4 @@ end;
 routine main(): integer is
     factorial(5);
     return 1;
-end;";
-
-ImperativeCompiler.Compile(program, "PlusOne");
+end;
