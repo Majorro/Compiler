@@ -172,7 +172,8 @@ ArrayType
 /* BodyNode(SimpleDeclarationNode declaration, BodyNode? remaining) */
 /* BodyNode(Node statement, BodyNode? remaining) */
 Body
-: Body SimpleDeclaration { $$ = new BodyNode((SimpleDeclarationNode)$2, (BodyNode)$1); }
+: /* empty */ { $$ = new BodyNode(); }
+| Body SimpleDeclaration { $$ = new BodyNode((SimpleDeclarationNode)$2, (BodyNode)$1); }
 | Body Statement TkSemicolon { $$ = new BodyNode($2, (BodyNode)$1); }
 | SimpleDeclaration { $$ = new BodyNode((SimpleDeclarationNode)$1, null); }
 | Statement TkSemicolon { $$ = new BodyNode($1, null); }

@@ -1,7 +1,7 @@
 ﻿using Compiler.Core;
 
 const string program = @"
-routine factorial(n: integer): bool is
+routine factorial(n: integer): boolean is
     if n /= 1 then
         var a is n * factorial(n - 1);
         return a;
