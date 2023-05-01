@@ -59,14 +59,13 @@ public class Tests
         var res = LoadProgram(name, compileToPath: dllName).Call<TReturn>(args);
         Assert.That(res, Is.EqualTo(result));
     }
-    
-    [Test]
-    public void TestIntToBoolException()
+
+    [TestCase("IntToBool", new object[] { 2 })]
+    [TestCase("IntToBool2Functions", new object[] { 2 })]
+    public void TestArgumentException(string name, object[] args)
     {
-        var name = "IntToBool"; 
-        object[] args = {"2"}; 
         var dllName = GetDllName(name, args);
-        Assert.Throws<ArgumentException>(() => LoadProgram(name, compileToPath: dllName).Call<bool>(args));
+        Assert.Throws<TargetInvocationException>(() => LoadProgram(name, compileToPath: dllName).Call<bool>(args));
     }
 
     public static (int a, float b, bool c) RecordTest = (3, 2f, true);
@@ -91,7 +90,7 @@ public class Tests
         new object[] { "Logic1010", new object[] { true, false }, false },
         new object[] { "Logic1010", new object[] { false, true }, true },
         new object[] { "Logic1010", new object[] { false, false }, false },
-        // new object[] { "Pythagoras", new object[] { 3f, 4f }, 5f },
+        new object[] { "Pythagoras", new object[] { 3f, 4f }, 5f },
         // new object[] { "CastingAndRecord", new object[] { RecordTest }, RecordTest },
     };
 }

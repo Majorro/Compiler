@@ -1,0 +1,10 @@
+﻿routine IntToBool(a: integer): boolean is
+    var bool is true;
+    bool := a;
+    return bool;
+end;
+
+routine IntToBool2Functions(a: integer): boolean is
+    IntToBool(a);
+    return false;
+end;

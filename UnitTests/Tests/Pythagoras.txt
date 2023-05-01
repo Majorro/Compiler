@@ -1,4 +1,6 @@
-﻿routine BabylonianSqrt(x: real): real is
+﻿routine Pythagoras(a: real, b: real): real is
+    var x is (a * a) + (b * b);
+    
     var start is 0;
     var stop is 10000;
     
@@ -7,8 +9,4 @@
         n := (n + (x / n)) * 0.5;
     end;
     return n;
-end;
-
-routine Pythagoras(a: real, b: real): real is
-    return BabylonianSqrt( a );
 end;

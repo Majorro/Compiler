@@ -9,7 +9,7 @@ public class Context
     public readonly Dictionary<string, string> Scope = new();
     public readonly List<string>? Errors;
     public readonly Dictionary<string, string> RoutineParams = new();
-    public readonly Dictionary<string, string> RoutineReturn = new();
+    public readonly Dictionary<string, string?> RoutineReturn = new();
     public static readonly List<string> RoutineNames = new();
 
     public Context(Context? context = null)
@@ -22,14 +22,14 @@ public class Context
         else ParentContext.ChildrenContexts.Add(this);
     }
 
-    public void AddRoutine(string name, string paramsType, string returnType)
+    public void AddRoutine(string name, string paramsType, string? returnType)
     {
         RoutineNames.Add(name);
         RoutineParams[name] = paramsType;
         RoutineReturn[name] = returnType;
     }
 
-    public (string ParamsType, string ReturnType)? GetRoutine(string name)
+    public (string ParamsType, string? ReturnType)? GetRoutine(string name)
     {
         return RoutineParams.TryGetValue(name, out var paramsType) &&
                RoutineReturn.TryGetValue(name, out var returnType)

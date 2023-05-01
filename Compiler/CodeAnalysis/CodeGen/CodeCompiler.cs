@@ -23,12 +23,13 @@ public partial class CodeCompiler
     protected readonly MetadataBuilder Metadata = new();
     protected readonly BlobBuilder BB = new();
     protected readonly BlobBuilder IlBuilder = new();
-    protected readonly ControlFlowBuilder ControlFlowBuilder = new();
     protected readonly MethodBodyStreamEncoder MethodBodyStream;
     protected readonly InstructionEncoder IE;
     protected readonly Dictionary<string, Action> OperatorMapper;
+    protected readonly Dictionary<string, MethodDefinitionHandle> NameToRoutineHandler = new();
+
     public readonly List<string> RoutineLocalVariables = new();
-    protected int ParameterIndex = 1;
+    // protected int ParameterIndex = 1;
 
     protected readonly string ProgramName;
     public string FileName => $"{ProgramName}.dll";
@@ -48,7 +49,7 @@ public partial class CodeCompiler
         NodeType = typecheckVisitor.NodeType;
 
         MethodBodyStream = new MethodBodyStreamEncoder(IlBuilder);
-        IE = new InstructionEncoder(BB, ControlFlowBuilder);
+        IE = new InstructionEncoder(new BlobBuilder(), new ControlFlowBuilder());
         OperatorMapper = new()
         {
             ["-"] = () => IE.OpCode(ILOpCode.Sub),
@@ -104,7 +105,6 @@ public partial class CodeCompiler
                 //     SimpleDeclarationNodeVisitor(node, context);
                 //     break;
                 case RoutineDeclarationNode node:
-                    RoutineLocalVariables.Clear();
                     var method = RoutineDeclarationNodeVisitor(node, context);
                     methods.Add(method);
                     break;
@@ -128,12 +128,12 @@ public partial class CodeCompiler
             var param = node.Parameters[index];
             var name = param.Identifier.Name;
 
-            var parameterHandle = Metadata.AddParameter(
-                attributes: ParameterAttributes.None,
-                name: Metadata.GetOrAddString(name),
-                sequenceNumber: ParameterIndex);
-            ParameterIndex++;
-            if (index == 0) firstParameterHandle = parameterHandle;
+            // var parameterHandle = Metadata.AddParameter(
+            //     attributes: ParameterAttributes.None,
+            //     name: Metadata.GetOrAddString(name),
+            //     sequenceNumber: ParameterIndex);
+            // ParameterIndex++;
+            // if (index == 0) firstParameterHandle = parameterHandle;
 
             var indexNew = index;
             childContext.AddVariable(name,
@@ -147,9 +147,9 @@ public partial class CodeCompiler
 
         var returnTypeName = node.ReturnType == null ? null : NodeType[node.ReturnType];
 
-        var plusOneSig = new BlobBuilder();
+        var routineSig = new BlobBuilder();
 
-        new BlobEncoder(plusOneSig).MethodSignature().Parameters(
+        new BlobEncoder(routineSig).MethodSignature().Parameters(
             parameterTypeNames.Count,
             returnType =>
             {
@@ -178,25 +178,29 @@ public partial class CodeCompiler
                     throw new InvalidOperationException($"{local} has undefined type")
                 ](typeEncoder);
             }
+
+            RoutineLocalVariables.Clear();
         }));
 
-        var mainBodyOffset = MethodBodyStream.AddMethodBody(
+        var routineBodyOffset = MethodBodyStream.AddMethodBody(
             instructionEncoder: IE,
             localVariablesSignature: localVariablesSignature
         );
 
         var routineName = node.Identifier.Name;
-        MethodDefinitionHandle mainMethodDef = Metadata.AddMethodDefinition(
+        MethodDefinitionHandle routineMethodDef = Metadata.AddMethodDefinition(
             MethodAttributes.Public | MethodAttributes.Static | MethodAttributes.HideBySig,
             MethodImplAttributes.IL,
             Metadata.GetOrAddString(routineName),
-            Metadata.GetOrAddBlob(plusOneSig),
-            mainBodyOffset,
+            Metadata.GetOrAddBlob(routineSig),
+            routineBodyOffset,
             firstParameterHandle);
 
         BB.Clear();
 
-        return mainMethodDef;
+        NameToRoutineHandler[routineName] = routineMethodDef;
+
+        return routineMethodDef;
     }
 
     protected void BodyVisitor(BodyNode body, CodegenContext context, bool reversedIteration = false)
@@ -264,7 +268,9 @@ public partial class CodeCompiler
             case AssignmentNode node:
                 AssignmentNodeVisitor(node, childContext);
                 break;
-            // RoutineCallNode node => RoutineCallVisitor(node, context),
+            case RoutineCallNode node:
+                RoutineCallVisitor(node, childContext);
+                break;
             case WhileLoopNode node:
                 WhileLoopVisitor(node, childContext);
                 break;
@@ -282,9 +288,25 @@ public partial class CodeCompiler
 
     protected void AssignmentNodeVisitor(AssignmentNode assigment, CodegenContext context)
     {
+        var typecheckContext = NodeTypecheckContext[assigment];
         ExpressionNodeVisitor(assigment.Expression, context);
         ModifiablePrimaryNodeVisitor(assigment.Identifier, context, load: false);
+        var expectedType = typecheckContext.Get(assigment.Identifier.Identifier!.Name);
+        var actualType = NodeType[assigment.Expression];
+
+        Cast(expectedType!, actualType!);
         context.StoreVariable(assigment.Identifier.Identifier!.Name);
+    }
+
+    protected void RoutineCallVisitor(RoutineCallNode node, CodegenContext context)
+    {
+        var routineName = node.RoutineIdentifier.Name;
+        foreach (var arg in node.Arguments)
+        {
+            ExpressionNodeVisitor(arg, context);
+        }
+
+        IE.Call(NameToRoutineHandler[routineName]);
     }
 
     protected void WhileLoopVisitor(WhileLoopNode loop, CodegenContext context)
@@ -461,11 +483,11 @@ public partial class CodeCompiler
         var expectedType = typecheckContext.GetRoutine(currRoutineName)!.Value.ReturnType;
 
 
-        Cast(expectedType, actualType!);
+        Cast(expectedType, actualType);
         IE.OpCode(ILOpCode.Ret);
     }
 
-    protected void Cast(string expectedType, string actualType)
+    protected void Cast(string? expectedType, string? actualType)
     {
         var typesTuple = (expectedType, actualType);
 
