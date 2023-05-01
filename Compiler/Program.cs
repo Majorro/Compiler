@@ -1,9 +1,11 @@
-﻿using System.Security.Cryptography;
+﻿using System.Globalization;
 using Compiler.CodeAnalysis;
-using Compiler.CodeAnalysis.LexerTokens;
+using Compiler.CodeAnalysis.CodeGen;
 using Compiler.CodeAnalysis.SyntaxAnalysis;
 using Compiler.CodeAnalysis.Typechecker;
 using Newtonsoft.Json;
+
+namespace Compiler;
 
 // Doesn't work:
 // function calls
@@ -24,15 +26,14 @@ using Newtonsoft.Json;
 //
 // routine main(a: integer): integer is
 //     var d is a + 1 * 10 / 100;
-//     return c;
+//     return d;
 // end;
 // ";
-
-
 
 // const string program = @"
 // var a is 1+2;
 // ";
+
 // const string program = @"
 // routine SumOfArray ( arr : array[] integer ) : integer is
 //     var sum is 0;
@@ -47,7 +48,7 @@ using Newtonsoft.Json;
 // end;
 // ";
 
-// const string checkProgram = @"
+// const string program = @"
 // routine SumFunction (a: integer, b: integer): integer is
 //     return a + b;
 // end;
@@ -57,6 +58,7 @@ using Newtonsoft.Json;
 //     return 1;
 // end;
 // ";
+
 // const string program = @"
 // print(42);
 // ";
@@ -76,53 +78,72 @@ using Newtonsoft.Json;
 // program = @"2a int";
 
 
-const string program = @"
-routine factorial(n: integer): bool is
-    if n /= 1 then
-        var a is n * factorial(n - 1);
-        return a;
-    else
-        return 1;
-    end;
-end;
+// const string program = @"
+// routine factorial(n: integer): bool is
+//     if n /= 1 then
+//         var a is n * factorial(n - 1);
+//         return a;
+//     else
+//         return 1;
+//     end;
+// end;
+//
+// routine main(): integer is
+//     factorial(5);
+//     return 1;
+// end;";
 
-routine main(): integer is
-    factorial(5);
-    return 1;
-end;";
-
-
-
-// PrintTokens(program);
-PrintAst(program);
-
-void PrintTokens(string prog)
+public class Program
 {
-    var lexer = new Lexer(prog);
-
-    foreach (var tok in lexer.ProgramTokens)
+    public static void Main()
     {
-        Console.ForegroundColor = ConsoleColor.Yellow;
-        Console.Write($"{tok.GetType().Name}\t");
-        Console.ForegroundColor = ConsoleColor.Green;
-        Console.Write($"{tok.TokenId}\t");
-        Console.ForegroundColor = ConsoleColor.White;
-        Console.WriteLine($"{JsonConvert.SerializeObject(tok)}");
+        const string program = @"
+        routine PlusOne(a: integer): integer is
+            var res is a + 1;
+            return res;
+        end;
+        ";
+        Compile(program, "PlusOne");
     }
-}
 
-void PrintAst(string prog)
-{
-    var lexer = new Lexer(prog);
+    public static CodeCompiler Compile(string code, string name, string? path = null)
+    {
+        // Magic for double.TryParse function to work properly
+        Thread.CurrentThread.CurrentUICulture = new CultureInfo("en-US", false); 
+        Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US", false);
+        
+        var lexer = new Lexer(code);
+        Console.WriteLine("Tokenization done!");
+        PrintTokens(lexer);
+        
+        var parser = new Parser(lexer);
+        parser.Parse();
+        Console.WriteLine("Parsing done!");
+        PrintTree(parser);
 
-    var parser = new Parser(lexer);
-
-    parser.Parse();
+        var typeCheckContext = Typecheck.typecheckProgram(parser);
+        Console.WriteLine("Type checking done!");
+        
+        var compiler = CodeGen.Generate(name, parser, typeCheckContext, path);
+        Console.WriteLine("Code generation done!");
+        return compiler;
+    }
     
-    Console.WriteLine(parser.Tree);
-    var tree = parser.Tree;
+    public static void PrintTokens(Lexer lexer)
+    {
+        foreach (var tok in lexer.ProgramTokens)
+        {
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.Write($"{tok.GetType().Name}\t");
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.Write($"{tok.TokenId}\t");
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine($"{JsonConvert.SerializeObject(tok)}");
+        }
+    }
     
-    Typecheck.typecheckProgram(parser);
-    
-    Console.WriteLine("Type checking done!");
+    public static void PrintTree(Parser parser)
+    {
+        Console.WriteLine(parser.Tree);
+    }
 }

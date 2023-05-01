@@ -102,7 +102,7 @@ namespace Compiler.CodeAnalysis.SyntaxAnalysis
 
     public abstract class SimpleDeclarationNode : DeclarationNode
     {
-        public TypeNode Type { get; }
+        public TypeNode? Type { get; }
 
         protected SimpleDeclarationNode(IdentifierNode identifier, TypeNode type)
             : base(identifier) =>
@@ -445,6 +445,8 @@ namespace Compiler.CodeAnalysis.SyntaxAnalysis
             GetChildren(null);
 
         public IdentifierNode(Token identifier) => Token = identifier;
+
+        public string Name => (Token as IdentifierTk)?.value!;
     }
 
     public enum Operator

@@ -26,8 +26,8 @@ public class Lexer : AbstractScanner<Node, LexLocation>
     private void FinalStateAutomata(string text)
     {
         var buffer = "";
-        var lineNumber = 0;
-        var columnNumber = 0;
+        var lineNumber = 1;
+        var columnNumber = 1;
         text += ' ';
         foreach (var symbol in text + ' ')
         {

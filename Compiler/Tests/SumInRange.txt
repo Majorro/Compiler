@@ -1,9 +1,7 @@
-﻿
-
-routine getSumInRange(a: integer, b: integer) integer is
+﻿routine getSumInRange(a: integer, b: integer): integer is
     var sum is 0;
     var start is 0;
-    car end is 0;
+    var end is 0;
     
     if a > b then
         start := b;

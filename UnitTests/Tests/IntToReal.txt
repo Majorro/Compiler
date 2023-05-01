@@ -1,0 +1,3 @@
+﻿routine IntToReal(a: integer): real is
+    return a;
+end;

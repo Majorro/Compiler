@@ -1,0 +1,14 @@
+﻿routine CastingAndRecord(
+    r: record {
+        var ifield : integer;
+        var rfield : real;
+        var bfield : boolean;
+    } end
+): record {
+       var ifield : integer;
+       var rfield : real;
+       var bfield : boolean;
+   } end
+is
+    return r;
+end;

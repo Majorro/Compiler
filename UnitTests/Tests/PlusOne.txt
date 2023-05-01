@@ -1,0 +1,4 @@
+﻿routine PlusOne(a: integer): integer is
+    var res is a + 1;
+    return res;
+end;

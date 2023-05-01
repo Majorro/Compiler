@@ -1,0 +1,10 @@
+﻿routine Equal(a: integer, b: integer): boolean is
+    if a < b then 
+        return false;
+    else 
+        if a > b then
+            return false;
+        end;
+    end;
+    return true;
+end;

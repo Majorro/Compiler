@@ -1,0 +1,5 @@
+﻿routine IntToBool(a: integer): boolean is
+    var bool is true;
+    bool := a;
+    return bool;
+end;

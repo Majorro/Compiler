@@ -1,0 +1,3 @@
+﻿routine PlusOneReal(a: real): real is
+    return a + 1.0;
+end;

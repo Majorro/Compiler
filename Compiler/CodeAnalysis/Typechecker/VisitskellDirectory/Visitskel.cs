@@ -7,20 +7,26 @@ namespace Compiler.CodeAnalysis.Typechecker;
 
 public class Visitskel
 {
+    public readonly Dictionary<Node, Context> NodeContext = new();
+    public readonly Dictionary<Node, string?> NodeType = new();
     public void ProgramVisitor(ProgramNode program, Context context)
     {
+        NodeContext[program] = context;
         foreach (var routine in program.DeclarationList)
         {
             DeclarationNodeVisitor(routine, context);
         }
-
-        var t = context;
     }
 
     public object RoutineDeclarationNodeVisitor(RoutineDeclarationNode decl, Context context)
     {
         var childContext = new Context(context);
-        var parameters = new List<String>();
+        NodeContext[decl] = childContext;
+        
+        // Routine name
+        var ident = IdentifierNodeVisitor(decl.Identifier, childContext);
+
+        var parameters = new List<string>();
         // Parameters
         foreach (var param in decl.Parameters)
         {
@@ -32,40 +38,36 @@ public class Visitskel
         }
 
         // Return type
-        String? returnType = null;
+        string? returnType = null;
         if (decl.ReturnType != null)
         {
             returnType = TypeNodeVisitor(decl.ReturnType, childContext);
+            NodeType[decl.ReturnType] = returnType;
         }
+        context.AddRoutine(ident, string.Join(" ",parameters), returnType!);
 
         // Body
         var bodyType = BodyVisitor(decl.Body, childContext, true);
-        var ident = IdentifierNodeVisitor(decl.Identifier, childContext);
         if (bodyType != returnType)
         {
-            context.addError($"Return type not same as declared in routine {ident}");
+            context.AddError($"Return type not same as declared in routine {ident}");
             throw new Exception();
         }
-        context.addRoutine(ident, String.Join(" ",parameters));
         return null;
     }
 
-    public String? ParameterDeclarationNodeVisitor(ParameterDeclarationNode param, Context context)
+    public string? ParameterDeclarationNodeVisitor(ParameterDeclarationNode param, Context context)
     {
         var name = param.Identifier.Token as IdentifierTk;
         var type = TypeNodeVisitor(param.Type, context);
-        context.add(name.value, type);
+        context.Add(name.value, type);
         return type;
     }
 
-    public String? BodyVisitor(BodyNode body, Context context, Boolean reversedIteration = false)
+    public string? BodyVisitor(BodyNode body, Context context, bool reversedIteration = false)
     {
-        var items = body.Items;
-        var results = new List<String>();
-        if (reversedIteration)
-        {
-            items.Reverse();
-        }
+        var results = new List<string>();
+        var items = reversedIteration ? body.Items.ReverseList() : body.Items;
         
         foreach (var bodyStatement in items)
         {
@@ -73,7 +75,7 @@ public class Visitskel
             switch (bodyStatement)
             {
                 case IStatementNode node:
-                    var result = StatementNodeVisitor(node, context);
+                    var result = StatementNodeVisitor((Node) node, context);
                     if(result != null) results.Add(result);
                     break;
                 case DeclarationNode node:
@@ -86,41 +88,48 @@ public class Visitskel
         return results.Distinct().Count() == 1 ? results.First() : null;
     }
 
-    public String? ReturnNodeVisitor(ReturnNode returnStatement, Context context)
+    public string? ReturnNodeVisitor(ReturnNode returnStatement, Context context)
     {
-        return ExpressionNodeVisitor(returnStatement.Expression, context);
-        
+        NodeContext[returnStatement] = context;
+        var type = ExpressionNodeVisitor(returnStatement.Expression!, context);
+        NodeType[returnStatement] = type;
+        return type;
     }
 
-    public void VariableDeclVisitor(VariableDeclarationNode variable, Context context)
+    public string VariableDeclVisitor(VariableDeclarationNode variable, Context context)
     {
-        var identifier = variable.Identifier.Token as IdentifierTk;
-        String? type = ExpressionNodeVisitor(variable.Expression, context);
-        if (type is null) throw new Exception("error");
-        context.add(identifier.value, type);
+        var varName = variable.Identifier.Name;
+
+        string? type = variable.Type?.Kind.GetDescription();
+        if (type is null) type = ExpressionNodeVisitor(variable.Expression, context);
+        if (type is null) throw new Exception($"variable {varName} has no type");
+        context.Add(varName, type);
+        return type;
     }
 
-    public String? AssignmentNodeVisitor(AssignmentNode assigment, Context context)
+    public string? AssignmentNodeVisitor(AssignmentNode assigment, Context context)
     {
-        String? type = ExpressionNodeVisitor(assigment.Expression, context);
+        string? type = ExpressionNodeVisitor(assigment.Expression, context);
         var mainType = ModifiablePrimaryNodeVisitor(assigment.Identifier, context);
 
         if (mainType == type) return null;
         if (type != null && (type == "integer" || type == "boolean" || type == "real")) return null;
-        context.addError($"Type of expression is not convertable!");
+        context.AddError($"Type of expression is not convertable!");
         throw new Exception();
 
     }
 
-    public String? IfNodeVisitor(IfNode ifStatement, Context context)
+    public string? IfNodeVisitor(IfNode ifStatement, Context context)
     {
         var childContext = new Context(context); 
+        NodeContext[ifStatement] = childContext;
+        
         // Add handling condition;
 
         var condition = ExpressionNodeVisitor(ifStatement.Condition, context);
         if (condition != "boolean")
         {
-            context.addError($"Condition is not boolean!");
+            context.AddError($"Condition is not boolean!");
             throw new Exception();
         }
         
@@ -132,7 +141,7 @@ public class Visitskel
         if (returnType != null && elseType != null)
         {
             if (returnType == elseType) return returnType;
-            context.addError($"Return types at ifloop not same!");
+            context.AddError($"Return types at ifloop not same!");
             throw new Exception();
 
         }else if (returnType == null && elseType != null)
@@ -146,57 +155,61 @@ public class Visitskel
         return null;
     }
 
-    public String? ForLoopVisitor(ForLoopNode loop, Context context)
+    public string? ForLoopVisitor(ForLoopNode loop, Context context)
     {
         //Add handling Range and identifier
-        var ident = ((loop.VariableIdentifier.Token as IdentifierTk)!).value;
+        var ident = loop.VariableIdentifier.Name;
         var rangeType = RangeNodeVisitor(loop.Range, context);
-        context.add(ident, rangeType!);
+        context.Add(ident, rangeType!);
         var bodyType = BodyVisitor(loop.Body, context);
         return null;
     }
 
-    public String? WhileLoopVisitor(WhileLoopNode loop, Context context)
+    public string? WhileLoopVisitor(WhileLoopNode loop, Context context)
     {
-        return null;
-        
+        var conditionType = ExpressionNodeVisitor(loop.Condition, context);
+        if (conditionType != "boolean")
+            context.AddError($"While condition expected to be boolean, " +
+                             $"found {conditionType} at {loop.Condition}");
+        return BodyVisitor(loop.Body, context);
     }
 
     public string? RoutineCallVisitor(RoutineCallNode call, Context context)
     {
-        var paramList = new List<String>();
+        var paramList = new List<string>();
         var ident = IdentifierNodeVisitor(call.RoutineIdentifier, context);
         foreach (var expr in call.Arguments)
         {
             paramList.Add(ExpressionNodeVisitor(expr, context));
         }
 
-        if (String.Join(" ", paramList) == context.getParameters(ident)) return null;
+        if (string.Join(" ", paramList) == context.GetRoutine(ident)!.Value.ParamsType ) return null;
         
-        context.addError($"Incorrect routine call {ident}");
+        context.AddError($"Incorrect routine call {ident}");
         throw new Exception();
     }
 
-    public String? LiteralNodeVisitor(LiteralNode expr, Context context)
+    public string? LiteralNodeVisitor(LiteralNode expr, Context context)
     {
-        var type = expr.Kind;
-        switch (type)
+        switch (expr.Kind)
         {
             case null:
-                context.addError($"Type is null at {expr.Token.Span!.StartColumn} {expr.Token.Span.StartLine} end at {expr.Token.Span.EndColumn} {expr.Token.Span.EndLine}");
+                context.AddError($"Type is null at {expr.Token.Span!.StartColumn} " +
+                                 $"{expr.Token.Span.StartLine} end at {expr.Token.Span.EndColumn} " +
+                                 $"{expr.Token.Span.EndLine}");
                 break;
         }
-        return expr.Kind.GetDescription() ?? throw new InvalidOperationException();
+        var type = expr.Kind?.GetDescription() ?? throw new InvalidOperationException();
+        NodeType[expr] = type;
+        return type;
     }
 
-    public String? FactorNodeVisitor(FactorNode expr, Context context)
+    public string? FactorNodeVisitor(FactorNode expr, Context context)
     {
-        String? type = null;
+        string? type = null;
         var lhs = ExpressionNodeVisitor(expr.Lhs, context);
-
-        String? operator_ = OperatorNodeVisitor(expr.Operator, context);
-
         var rhs = ExpressionNodeVisitor(expr.Rhs, context);
+        string? operator_ = OperatorNodeVisitor(expr.Operator, context);
 
         if (rhs == null && operator_ == null)
         {
@@ -207,24 +220,24 @@ public class Visitskel
         {
             return lhs!;
         }
-        context.addError($"Incorrect type at factor node");
+        context.AddError($"Incorrect type at factor node");
         return null;
     }
 
-    public String? ModifiablePrimaryNodeVisitor(ModifiablePrimaryNode expr, Context context)
+    public string? ModifiablePrimaryNodeVisitor(ModifiablePrimaryNode expr, Context context)
     {
-        String? type = null;
-        String? operator_ = null;
+        string? type = null;
+        string? operator_ = null;
 
         if (expr.Prev == null)
         {
             type = IdentifierNodeVisitor(expr.Identifier!, context);
             if (type == null)
             {
-                context.addError($"Variable doesnt exist at {expr.Identifier!.Token.Span!.StartLine} {expr.Identifier.Token.Span!.StartColumn} {expr.Identifier.Token.Span!.EndLine} {expr.Identifier.Token.Span!.EndColumn}");
+                context.AddError($"Variable doesnt exist at {expr.Identifier!.Token.Span!.StartLine} {expr.Identifier.Token.Span!.StartColumn} {expr.Identifier.Token.Span!.EndLine} {expr.Identifier.Token.Span!.EndColumn}");
                 return null;
             }
-            return context.get(type);
+            return context.Get(type);
         }
 
         type = ModifiablePrimaryNodeVisitor(expr.Prev, context);
@@ -237,21 +250,22 @@ public class Visitskel
         return null;
     }
 
-    public String? RangeNodeVisitor(RangeNode node, Context context)
+    public string? RangeNodeVisitor(RangeNode node, Context context)
     {
         var from = ExpressionNodeVisitor(node.From, context);
         var to = ExpressionNodeVisitor(node.To, context);
 
         if (from == to)
         {
+            NodeType[node] = from;
             return from;
         }
         
-        context.addError($"Incorrect loop range: types are not same");
+        context.AddError($"Incorrect loop range: types are not same");
         throw new Exception();
     }
 
-    public String? ExpressionNodeVisitor(ExpressionNode expressionNode, Context context)
+    public string? ExpressionNodeVisitor(ExpressionNode expressionNode, Context context)
     {
         switch (expressionNode)
         {
@@ -276,7 +290,7 @@ public class Visitskel
         }
     }
 
-    public String? PrimaryNodeVisitor(PrimaryNode primaryNode, Context context)
+    public string? PrimaryNodeVisitor(PrimaryNode primaryNode, Context context)
     {
         return primaryNode switch
         {
@@ -287,10 +301,9 @@ public class Visitskel
         };
     }
 
-    public String? IdentifierNodeVisitor(IdentifierNode identifierNode, Context context)
+    public string IdentifierNodeVisitor(IdentifierNode identifierNode, Context context)
     {
-        var ident = identifierNode.Token as IdentifierTk;
-        return ident?.value;
+        return identifierNode.Name;
     }
 
 
@@ -310,7 +323,6 @@ public class Visitskel
                 RoutineDeclarationNodeVisitor(node, context);
                 return;
         }
-        
     }
 
 
@@ -327,55 +339,62 @@ public class Visitskel
         }
     }
 
-    public String? StatementNodeVisitor(IStatementNode statementNode, Context context)
+    public string? StatementNodeVisitor(Node statementNode, Context context)
     {
-        var child_context = new Context(context);
+        var childContext = new Context(context);
+        NodeContext[statementNode] = childContext;
 
-        switch (statementNode)
+        var type = statementNode switch
         {
-            case AssignmentNode node:
-                return AssignmentNodeVisitor(node, child_context);
-            case RoutineCallNode node:
-                return RoutineCallVisitor(node, context);
-            case WhileLoopNode node:
-                return WhileLoopVisitor(node, child_context);
-            case ForLoopNode node:
-                return ForLoopVisitor(node, child_context);
-            case IfNode node:
-                return IfNodeVisitor(node, child_context);
-            case ReturnNode node:
-                return ReturnNodeVisitor(node, child_context);
-        }
-        
-        return null;
+            AssignmentNode node => AssignmentNodeVisitor(node, childContext),
+            RoutineCallNode node => RoutineCallVisitor(node, context),
+            WhileLoopNode node => WhileLoopVisitor(node, childContext),
+            ForLoopNode node => ForLoopVisitor(node, childContext),
+            IfNode node => IfNodeVisitor(node, childContext),
+            ReturnNode node => ReturnNodeVisitor(node, childContext),
+            _ => null
+        };
+        NodeType[statementNode] = type;
+        return type;
     }
 
-    public String? TypeNodeVisitor(TypeNode typeNode, Context context)
+    public string? TypeNodeVisitor(TypeNode typeNode, Context context)
     {
-        switch (typeNode)
+        var type = typeNode switch
         {
-            case ArrayTypeNode node:
-                return ArrayTypeNodeVisitor(node, context);
-            case RecordTypeNode node:
-                return RecordTypeNodeVisitor(node, context);
-            default:
-                return typeNode.Kind.GetDescription();
-        }
+            ArrayTypeNode node => ArrayTypeNodeVisitor(node, context),
+            RecordTypeNode node => RecordTypeNodeVisitor(node, context),
+            _ => typeNode.Kind.GetDescription()
+        };
+        NodeType[typeNode] = type;
+        return type;
     }
 
-    public String? ArrayTypeNodeVisitor(ArrayTypeNode arrayTypeNode, Context context)
+    public string? ArrayTypeNodeVisitor(ArrayTypeNode arrayTypeNode, Context context)
     {
         var elementsType = TypeNodeVisitor(arrayTypeNode.ElementsType, context);
         var kind = arrayTypeNode.Kind.GetDescription();
         return $"{kind} {elementsType}";
     }
 
-    public String? RecordTypeNodeVisitor(RecordTypeNode recordTypeNode, Context context)
+    public string? RecordTypeNodeVisitor(RecordTypeNode recordTypeNode, Context context)
     {
-        return null;
+        var childContext = new Context(context);
+        NodeContext[recordTypeNode] = childContext;
+
+        var type = "record ";
+        foreach (var recordVarDeclNode in recordTypeNode.Members)
+        {
+            var varType = VariableDeclVisitor(recordVarDeclNode, childContext);
+            type += $"{varType} ";
+        }
+        type = type.TrimEnd();
+        
+        NodeType[recordTypeNode] = type;
+        return type;
     }
 
-    public String? RelationNodeVisitor(RelationNode node, Context context)
+    public string? RelationNodeVisitor(RelationNode node, Context context)
     {
         var lhs = ExpressionNodeVisitor(node.Lhs, context);
         var rhs = ExpressionNodeVisitor(node.Rhs, context);
@@ -390,7 +409,7 @@ public class Visitskel
         return operator_ is ">" or ">=" or "<" or "<=" or "=" or "/=" ? "boolean" : null;
     }
 
-    public String? SimpleNodeVisitor(SimpleNode node, Context context)
+    public string? SimpleNodeVisitor(SimpleNode node, Context context)
     {
         var lhs = ExpressionNodeVisitor(node.Lhs, context);
         var rhs = ExpressionNodeVisitor(node.Rhs, context);
@@ -405,9 +424,11 @@ public class Visitskel
         };
     }
 
-    public String? OperatorNodeVisitor(OperatorNode operatorNode, Context context)
+    public string? OperatorNodeVisitor(OperatorNode operatorNode, Context context)
     {
-        return operatorNode.Kind.GetDescription().Split(" ")[0];
+        var type = operatorNode.Kind.GetDescription().Split(" ")[0];
+        NodeType[operatorNode] = type;
+        return type;
     }
     
 }

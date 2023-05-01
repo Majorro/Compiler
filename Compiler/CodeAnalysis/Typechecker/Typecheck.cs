@@ -4,7 +4,7 @@ namespace Compiler.CodeAnalysis.Typechecker;
 
 public static class Typecheck
 {
-    public static void typecheckProgram(Parser program)
+    public static Visitskel typecheckProgram(Parser program)
     {
         if (program.Tree == null)
         {
@@ -19,7 +19,9 @@ public static class Typecheck
         }
         catch (Exception exception)
         {
-            Console.WriteLine(string.Join("\n", context.getErrors()));
+            Console.WriteLine(string.Join("\n", context.GetErrors()));
         }
+
+        return visit;
     }
 }

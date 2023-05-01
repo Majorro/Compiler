@@ -4,62 +4,80 @@ namespace Compiler.CodeAnalysis.Typechecker;
 
 public class Context
 {
-    public Context? parent_context;
-    public Dictionary<String, String> scope = new Dictionary<string, string>();
-    public List<String> errors;
-    public Dictionary<String, String> routines = new Dictionary<string, string>();
+    public readonly Context? ParentContext;
+    public readonly List<Context> ChildrenContexts = new();
+    public readonly Dictionary<string, string> Scope = new();
+    public readonly List<string>? Errors;
+    public readonly Dictionary<string, string> RoutineParams = new();
+    public readonly Dictionary<string, string> RoutineReturn = new();
+    public static readonly List<string> RoutineNames = new();
 
-    public Context(Context? context)
+    public Context(Context? context = null)
     {
-        this.parent_context = context;
-        if (parent_context == null)
+        ParentContext = context;
+        if (ParentContext == null)
         {
-            errors = new List<String>();
+            Errors = new List<string>();
         }
+        else ParentContext.ChildrenContexts.Add(this);
     }
 
-    public void addRoutine(String name, String parameters)
+    public void AddRoutine(string name, string paramsType, string returnType)
     {
-        routines[name] = parameters;
+        RoutineNames.Add(name);
+        RoutineParams[name] = paramsType;
+        RoutineReturn[name] = returnType;
     }
 
-    public String? getParameters(String name)
+    public (string ParamsType, string ReturnType)? GetRoutine(string name)
     {
-        return routines.TryGetValue(name, out var value) ? value : parent_context?.getParameters(name);
+        return RoutineParams.TryGetValue(name, out var paramsType) &&
+               RoutineReturn.TryGetValue(name, out var returnType)
+            ? (paramsType, returnType)
+            : ParentContext?.GetRoutine(name);
     }
 
-    public void add(String name, String type)
+    public void Add(string name, string type)
     {
-        scope[name] = type;
+        Scope[name] = type;
     }
 
-    public String? get(String name)
+    public string? Get(string? name, bool fromChildren = false)
     {
-        return scope.TryGetValue(name, out var value) ? value : parent_context?.get(name);
-    }
-
-    public void addError(String error)
-    {
-        if (parent_context == null)
+        if (name == null) return null;
+        if (Scope.TryGetValue(name, out var value)) return value;
+        if (fromChildren)
         {
-            this.errors.Add(error);
+            return ChildrenContexts
+                .Select(context => context.Get(name, fromChildren: true))
+                .Where(e => e != null)
+                .FirstOrDefault(defaultValue: null);
+        }
+
+        return ParentContext?.Get(name);
+    }
+
+    public void AddError(string error)
+    {
+        if (ParentContext == null)
+        {
+            Errors!.Add(error);
         }
         else
         {
-            this.parent_context.addError(error);
+            ParentContext.AddError(error);
         }
     }
 
-    public List<String> getErrors()
+    public List<string> GetErrors()
     {
-        if (parent_context == null)
+        if (ParentContext == null)
         {
-            return this.errors;
+            return Errors;
         }
         else
         {
-            return this.parent_context.getErrors();
+            return ParentContext.GetErrors();
         }
     }
-
 }

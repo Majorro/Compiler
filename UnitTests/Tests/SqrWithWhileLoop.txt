@@ -1,0 +1,11 @@
+﻿routine SqrWithWhileLoop(a: integer, times: integer): integer is
+    if times = 0 then
+        return 1;
+    end;
+    var answer is a;
+    while times > 1 loop
+        answer := answer * a;
+        times := times - 1;
+    end;
+    return answer;
+end;
