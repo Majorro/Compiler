@@ -6,13 +6,8 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
-
+  build-and-test:
     runs-on: ubuntu-latest
-    
-    defaults:
-      run:
-        working-directory: ./Compiler
 
     steps:
     - uses: actions/checkout@v3
