@@ -5,6 +5,5 @@
 end;
 
 routine IntToBool2Functions(a: integer): boolean is
-    IntToBool(a);
-    return false;
+    return IntToBool(a);
 end;

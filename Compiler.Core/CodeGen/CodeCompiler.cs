@@ -23,6 +23,8 @@ public partial class CodeCompiler
 
     protected readonly MetadataBuilder Metadata = new();
     protected readonly BlobBuilder BB = new();
+    protected readonly BlobBuilder CodeBuilder = new();
+    protected readonly ControlFlowBuilder FlowBuilder = new();
     protected readonly BlobBuilder IlBuilder = new();
     protected readonly MethodBodyStreamEncoder MethodBodyStream;
     protected readonly InstructionEncoder IE;
@@ -50,7 +52,7 @@ public partial class CodeCompiler
         NodeType = typecheckVisitor.NodeType;
 
         MethodBodyStream = new MethodBodyStreamEncoder(IlBuilder);
-        IE = new InstructionEncoder(new BlobBuilder(), new ControlFlowBuilder());
+        IE = new InstructionEncoder(CodeBuilder, FlowBuilder);
         OperatorMapper = new Dictionary<string, Action>
         {
             ["-"] = () => IE.OpCode(ILOpCode.Sub),
@@ -198,6 +200,8 @@ public partial class CodeCompiler
             firstParameterHandle);
 
         BB.Clear();
+        CodeBuilder.Clear();
+        FlowBuilder.Clear();
 
         NameToRoutineHandler[routineName] = routineMethodDef;
 
@@ -393,6 +397,9 @@ public partial class CodeCompiler
             // case FactorNode node:
             //     FactorNodeVisitor(node, context);
             //     break;
+            case RoutineCallNode node:
+                RoutineCallVisitor(node, context);
+                break;
             case PrimaryNode node:
                 PrimaryNodeVisitor(node, context);
                 break;

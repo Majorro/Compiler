@@ -1,3 +1,5 @@
 ﻿routine IntToReal(a: integer): real is
-    return a;
+    var res is 99.9;
+    res := a;
+    return res;
 end;

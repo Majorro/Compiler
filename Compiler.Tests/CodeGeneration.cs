@@ -60,8 +60,8 @@ public class CodeGeneration
         new object[] { "IntToReal", new object[] { 42 }, 42f },
         new object[] { "IntToBool", new object[] { 0 }, false },
         new object[] { "IntToBool", new object[] { 1 }, true },
-        new object[] { "SumRealToInt", new object[] { 1.1f, 2.2f }, 3 },
-        new object[] { "SumRealToInt", new object[] { 1.1f, 2.6f }, 4 },
+        new object[] { "RealToInt", new object[] { 1.1f }, 1 },
+        new object[] { "RealToInt", new object[] { 1.6f }, 2 },
         new object[] { "Equal", new object[] { 5, 5 }, true },
         new object[] { "Equal", new object[] { 5, 6 }, false },
         new object[] { "Equal", new object[] { 6, 5 }, false },
@@ -73,7 +73,8 @@ public class CodeGeneration
         new object[] { "Logic1010", new object[] { true, false }, false },
         new object[] { "Logic1010", new object[] { false, true }, true },
         new object[] { "Logic1010", new object[] { false, false }, false },
-        new object[] { "Pythagoras", new object[] { 3f, 4f }, 5f }
+        new object[] { "Pythagoras", new object[] { 3f, 4f }, 5f },
+        new object[] { "QuadraticSolver", new object[] { -3f, 2f, 1f }, 1f }
         // new object[] { "CastingAndRecord", new object[] { RecordTest }, RecordTest },
     };
 

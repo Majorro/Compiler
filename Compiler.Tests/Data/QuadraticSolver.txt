@@ -9,7 +9,8 @@
     return n;
 end;
 
-routine QuadraticSolver(a: real, b: real, c: real): integer is
-    var d is BabylonianSqrt((b * b) - (4 * a * c));
-    return a + 1;
+routine QuadraticSolver(a: real, b: real, c: real): real is
+    var d_sqrt is BabylonianSqrt((b * b) - (4.0 * a * c));
+    var num is 0.0 - b - d_sqrt;
+    return num / (2.0 * a);
 end;
