@@ -18,7 +18,7 @@ public static class Typecheck
         }
         catch (Exception exception)
         {
-            Console.WriteLine(string.Join("\n", context.GetErrors()));
+            throw new Exception(string.Join("\n", context.GetErrors()));
         }
 
         return visit;

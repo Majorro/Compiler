@@ -1,18 +1,10 @@
 ﻿using Compiler.Core;
 
 const string program = @"
-routine factorial(n: integer): boolean is
-    if n /= 1 then
-        var a is n * factorial(n - 1);
-        return a;
-    else
-        return 1;
-    end;
-end;
-
-routine main(): integer is
-    factorial(5);
-    return 1;
+routine SumRealToInt(a: real, b: real): integer is
+    var res is 99.9;
+    res := a + b;
+    return res;
 end;";
 
 ImperativeCompiler.Compile(program, "PlusOne");

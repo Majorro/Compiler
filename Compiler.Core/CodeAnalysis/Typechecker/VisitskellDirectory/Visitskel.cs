@@ -132,7 +132,7 @@ public class Visitskel
             throw new Exception();
         }
 
-        var returnType = BodyVisitor(ifStatement.ThenBody, childContext);
+        var returnType = BodyVisitor(ifStatement.ThenBody, childContext, true);
 
         if (ifStatement.ElseBody == null) return returnType;
         var elseType = BodyVisitor(ifStatement.ElseBody, childContext);
@@ -300,6 +300,7 @@ public class Visitskel
             ModifiablePrimaryNode node => ModifiablePrimaryNodeVisitor(node, context),
             LiteralNode node => LiteralNodeVisitor(node, context),
             IdentifierNode node => IdentifierNodeVisitor(node, context),
+            RoutineCallNode node => RoutineCallVisitor(node, context),
             _ => null
         };
     }
@@ -414,7 +415,8 @@ public class Visitskel
         var lhs = ExpressionNodeVisitor(node.Lhs, context);
         var rhs = ExpressionNodeVisitor(node.Rhs, context);
         var @operator = OperatorNodeVisitor(node.Operator, context);
-        if ((rhs != "integer" && rhs != "real") || (lhs != "integer" && lhs != "real")) return null;
+        var typesList = new List<String>() { "integer", "real" };
+        if (!typesList.Contains(lhs) || !typesList.Contains(rhs)) return null;
 
         if (@operator == "*" || @operator == "/")
             return lhs == "real" || rhs == "real" ? "real" : "integer";
