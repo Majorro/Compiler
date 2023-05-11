@@ -21,6 +21,35 @@ public partial class CodeCompiler
         ["boolean"] = type => type.Boolean()
     };
 
+    public Action<SignatureTypeEncoder> RecordFieldTypeMap(string typeRecord, int fieldI)
+    {
+        // fieldI should be 1,2,3 ... 8
+        if (fieldI < 1) throw new ArgumentException("field enumeration starts with 1");
+        var typeArgs = typeRecord.Split(" ");
+        return TypeMap(typeArgs[fieldI]);
+    }
+
+    public Action<SignatureTypeEncoder> TypeMap(string type)
+    {
+        if (TypeMapper.TryGetValue(type, out var action)) return action;
+        if (type.StartsWith("record"))
+        {
+            action = typeEncoder =>
+            {
+                var typeArgs = type.Split(" ").Skip(1).ToArray();
+                var res = typeEncoder.GenericInstantiation(
+                    SystemValueTypeRefs[typeArgs.Length], typeArgs.Length, true);
+                foreach (var typeArg in typeArgs)
+                {
+                    TypeMap(typeArg)(res.AddArgument());
+                }
+            };
+            return action;
+        }
+
+        throw new ArgumentException($"Unknown type: {type}");
+    }
+
     protected readonly MetadataBuilder Metadata = new();
     protected readonly BlobBuilder BB = new();
     protected readonly BlobBuilder CodeBuilder = new();
@@ -28,8 +57,11 @@ public partial class CodeCompiler
     protected readonly BlobBuilder IlBuilder = new();
     protected readonly MethodBodyStreamEncoder MethodBodyStream;
     protected readonly InstructionEncoder IE;
+
     protected readonly Dictionary<string, Action> OperatorMapper;
     protected readonly Dictionary<string, MethodDefinitionHandle> NameToRoutineHandler = new();
+    protected readonly Dictionary<Node, Context> NodeTypecheckContext;
+    protected readonly Dictionary<Node, string?> NodeType;
 
     public readonly List<string> RoutineLocalVariables = new();
     // protected int ParameterIndex = 1;
@@ -37,11 +69,8 @@ public partial class CodeCompiler
     protected readonly string ProgramName;
     public string FileName => $"{ProgramName}.dll";
     protected readonly Parser Program;
-    protected readonly Dictionary<Node, Context> NodeTypecheckContext;
-    protected readonly Dictionary<Node, string?> NodeType;
 
     protected BlobHandle ParameterlessCtorBlobIndex;
-    protected TypeReferenceHandle SystemObjectTypeRef, ArgumentExceptionTypeRef;
     protected MemberReferenceHandle ObjectCtorMemberRef, ArgumentExceptionMemberRef;
 
     public CodeCompiler(string programName, Parser program, Visitskel typecheckVisitor)
@@ -97,6 +126,12 @@ public partial class CodeCompiler
         WriteMetadataToFile(path: path ?? FileName);
     }
 
+    public BlobBuilder CompileToBlob()
+    {
+        ProgramNode(Program.Tree.Root, new CodegenContext());
+        return WriteMetadataToBlob();
+    }
+
     protected void ProgramNode(ProgramNode program, CodegenContext context)
     {
         List<MethodDefinitionHandle> methods = new();
@@ -144,6 +179,7 @@ public partial class CodeCompiler
                 () => IE.LoadArgument(indexNew),
                 () => IE.StoreArgument(indexNew)
             );
+            childContext.AddLocalVariableIndexes(name, index);
 
             var temp = typecheckContext.Get(name);
             if (temp != null) parameterTypeNames.Add(temp);
@@ -159,16 +195,17 @@ public partial class CodeCompiler
             {
                 if (returnTypeName == null) returnType.Void();
                 // else if (returnTypeName.StartsWith("record")) 
-                else TypeMapper[returnTypeName](returnType.Type());
+                else TypeMap(returnTypeName)(returnType.Type());
             },
             parameters =>
             {
                 foreach (var typeName in parameterTypeNames)
                 {
-                    TypeMapper[typeName](parameters.AddParameter().Type());
+                    TypeMap(typeName)(parameters.AddParameter().Type());
                 }
             });
 
+        RoutineLocalVariables.Clear();
         BodyVisitor(node.Body, childContext, true);
 
         var localVariablesSignature = Metadata.AddStandaloneSignature(EncodeBlob(e =>
@@ -177,17 +214,15 @@ public partial class CodeCompiler
             foreach (var local in RoutineLocalVariables)
             {
                 var typeEncoder = localsEncoder.AddVariable().Type();
-                TypeMapper[
+                TypeMap(
                     typecheckContext.Get(local, fromChildren: true) ??
                     throw new InvalidOperationException($"{local} has undefined type")
-                ](typeEncoder);
+                )(typeEncoder);
             }
-
-            RoutineLocalVariables.Clear();
         }));
 
         var routineBodyOffset = MethodBodyStream.AddMethodBody(
-            instructionEncoder: IE, 
+            instructionEncoder: IE,
             localVariablesSignature: localVariablesSignature);
 
         var routineName = node.Identifier.Name;
@@ -295,14 +330,39 @@ public partial class CodeCompiler
 
     protected void AssignmentNodeVisitor(AssignmentNode assigment, CodegenContext context)
     {
+        if (assigment.Identifier.Prev is not null)
+        {
+            // If record, load address of record
+            IE.LoadArgumentAddress(context.GetLocalVariableIndexes(assigment.Identifier.Prev.Identifier!.Name));
+        }
+
         var typecheckContext = NodeTypecheckContext[assigment];
         ExpressionNodeVisitor(assigment.Expression, context);
         ModifiablePrimaryNodeVisitor(assigment.Identifier, context, load: false);
-        var expectedType = typecheckContext.Get(assigment.Identifier.Identifier!.Name);
+        var name = assigment.Identifier.Identifier!.Name;
+        var expectedType = typecheckContext.Get(name);
         var actualType = NodeType[assigment.Expression];
 
         Cast(expectedType!, actualType!);
-        context.StoreVariable(assigment.Identifier.Identifier!.Name);
+        if (assigment.Identifier.Prev is null)
+        {
+            context.StoreVariable(name);
+            return;
+        }
+
+        var recordName = assigment.Identifier.Prev.Identifier!.Name;
+        var fieldName = name;
+
+        var recordType = typecheckContext.Get(recordName);
+        var typeNames = recordType!.Split(" ").ToList();
+        var fieldType = typecheckContext.Get(fieldName);
+        if (fieldType is null) throw new ArgumentException($"No such field: {recordName}.{fieldName}");
+        var fieldIndex = typeNames.IndexOf(fieldType);
+        if (fieldIndex == -1) throw new ArgumentException($"No such field: {recordName}.{fieldName}");
+        IE.OpCode(ILOpCode.Stfld);
+        IE.Token(GetRecordField(
+            recordType,
+            fieldIndex));
     }
 
     protected void RoutineCallVisitor(RoutineCallNode node, CodegenContext context)
@@ -350,9 +410,7 @@ public partial class CodeCompiler
         IE.Branch(ILOpCode.Br_s, conditionCheckLabel);
 
         IE.MarkLabel(bodyLabel);
-        IE.OpCode(ILOpCode.Nop);
         BodyVisitor(loop.Body, context, reversedIteration: true);
-        IE.OpCode(ILOpCode.Nop);
         IE.LoadLocal(iIndex);
         IE.LoadConstantI4(1);
         IE.OpCode(ILOpCode.Add);

@@ -7,6 +7,10 @@ namespace Compiler.Core.CodeGen;
 
 public partial class CodeCompiler
 {
+    protected TypeReferenceHandle SystemObjectTypeRef, ArgumentExceptionTypeRef;
+    protected List<TypeReferenceHandle> SystemValueTypeRefs = new();
+    protected Dictionary<TypeReferenceHandle, List<MemberReference>> SystemValueTypeFieldRefs = new();
+
     public BlobHandle EncodeBlob(Action<BlobEncoder> encoder)
     {
         var blob = new BlobBuilder();
@@ -68,6 +72,16 @@ public partial class CodeCompiler
             Metadata.GetOrAddBlob(BB));
         BB.Clear();
 
+        // Get reference to System.ValueTuple constructor method.
+        // new BlobEncoder(BB).MethodSignature(isInstanceMethod: true).Parameters(1,
+        //     returnType => returnType.Void(),
+        //     parameters => parameters.AddParameter().Type().String());
+        // ArgumentExceptionMemberRef = Metadata.AddMemberReference(
+        //     ArgumentExceptionTypeRef,
+        //     Metadata.GetOrAddString(".ctor"),
+        //     Metadata.GetOrAddBlob(BB));
+        // BB.Clear();
+
         // new BlobEncoder(BB).MethodSignature().Parameters(1,
         //     returnType => returnType.Type().Int32(),
         //     parameters => parameters.AddParameter().Type().String());
@@ -76,6 +90,24 @@ public partial class CodeCompiler
         //     Metadata.GetOrAddString("Parse"),
         //     Metadata.GetOrAddBlob(BB));
         // BB.Clear();
+    }
+
+    protected MemberReferenceHandle GetRecordField(string recordType, int fieldI)
+    {
+        var typeSpecSig = new BlobEncoder(BB).TypeSpecificationSignature();
+        TypeMap(recordType)(typeSpecSig);
+        typeSpecSig.GenericTypeParameter(fieldI - 1);
+        var typeSpec = Metadata.AddTypeSpecification(Metadata.GetOrAddBlob(BB));
+        BB.Clear();
+
+        new BlobEncoder(BB).Field().Type().GenericTypeParameter(fieldI - 1);
+        var res = Metadata.AddMemberReference(
+            typeSpec,
+            Metadata.GetOrAddString($"Item{fieldI}"),
+            Metadata.GetOrAddBlob(BB)
+        );
+        BB.Clear();
+        return res;
     }
 
     protected void InitTypeRefs()
@@ -105,6 +137,15 @@ public partial class CodeCompiler
             mscorlibAssemblyRef,
             Metadata.GetOrAddString("System"),
             Metadata.GetOrAddString("ArgumentException"));
+
+        for (var i = 0; i <= 8; i++)
+        {
+            var typeRef = Metadata.AddTypeReference(
+                mscorlibAssemblyRef,
+                Metadata.GetOrAddString("System"),
+                Metadata.GetOrAddString(i > 0 ? $"ValueTuple`{i}" : "ValueTuple"));
+            SystemValueTypeRefs.Add(typeRef);
+        }
         //
         // SystemInt32TypeRef = Metadata.AddTypeReference(
         //     mscorlibAssemblyRef,
@@ -131,14 +172,8 @@ public partial class CodeCompiler
             AssemblyHashAlgorithm.None);
     }
 
-    public void WriteMetadataToFile(string path)
+    public BlobBuilder WriteMetadataToBlob()
     {
-        using var peStream = new FileStream(
-            path,
-            FileMode.OpenOrCreate,
-            FileAccess.ReadWrite
-        );
-
         var peHeaderBuilder = new PEHeaderBuilder(
             imageCharacteristics: Characteristics.ExecutableImage |
                                   Characteristics.LargeAddressAware |
@@ -155,6 +190,17 @@ public partial class CodeCompiler
         // Write executable into the specified stream.
         var peBlob = new BlobBuilder();
         var _ = peBuilder.Serialize(peBlob);
+        return peBlob;
+    }
+
+    public void WriteMetadataToFile(string path)
+    {
+        using var peStream = new FileStream(
+            path,
+            FileMode.OpenOrCreate,
+            FileAccess.ReadWrite
+        );
+        var peBlob = WriteMetadataToBlob();
         peBlob.WriteContentTo(peStream);
     }
 

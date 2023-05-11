@@ -10,5 +10,8 @@
        var bfield : boolean;
    } end
 is
+    r.ifield := 0;
+    r.rfield := 0.0;
+    r.bfield := false;
     return r;
 end;

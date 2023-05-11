@@ -23,7 +23,7 @@ public class CodeGeneration
         Assert.Throws<TargetInvocationException>(() => LoadProgram(name, compileToPath: dllName).Call<bool>(args));
     }
 
-    private Program LoadProgram(string name, string? compileToPath = null)
+    private Entrypoint.Program LoadProgram(string name, string? compileToPath = null)
     {
         var code = File.ReadAllText($"../../../Data/{name}.txt");
 
@@ -45,13 +45,13 @@ public class CodeGeneration
         Console.WriteLine("-- Local variable names:");
         Console.WriteLine(string.Join("\n", compiler.RoutineLocalVariables.ToArray()));
 
-        return new Program(theType, method!);
+        return new Entrypoint.Program(theType, method!);
     }
 
     private static string GetDllName(string name, object[] args) =>
         $"{name}_{string.Join(' ', args)}.dll";
 
-    private static (int a, float b, bool c) _recordTest = (3, 2f, true);
+    private static readonly (int a, float b, bool c) RecordTest = (3, 2f, true);
 
     private static object[] _divideCases =
     {
@@ -74,22 +74,7 @@ public class CodeGeneration
         new object[] { "Logic1010", new object[] { false, true }, true },
         new object[] { "Logic1010", new object[] { false, false }, false },
         new object[] { "Pythagoras", new object[] { 3f, 4f }, 5f },
-        new object[] { "QuadraticSolver", new object[] { -3f, 2f, 1f }, 1f }
-        // new object[] { "CastingAndRecord", new object[] { RecordTest }, RecordTest },
+        new object[] { "QuadraticSolver", new object[] { -3f, 2f, 1f }, 1f },
+        new object[] { "CastingAndRecord", new object[] { RecordTest }, (0, 0.0f, false) }
     };
-
-    private class Program
-    {
-        public readonly Type Type;
-        public readonly MethodInfo Entrypoint;
-
-        public Program(Type type, MethodInfo entrypoint)
-        {
-            Type = type;
-            Entrypoint = entrypoint;
-        }
-
-        public TReturn Call<TReturn>(params object[] args) =>
-            (TReturn)Entrypoint.Invoke(Type, args)!;
-    }
 }

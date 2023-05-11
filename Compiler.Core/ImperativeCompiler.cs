@@ -9,26 +9,32 @@ namespace Compiler.Core;
 
 public static class ImperativeCompiler
 {
-    public static CodeCompiler Compile(string code, string name, string? path = null)
+    public static CodeCompiler Compile(string code, string name, string? path = null, bool verbose = true)
     {
         // Magic for double.TryParse function to work properly
         Thread.CurrentThread.CurrentUICulture = new CultureInfo("en-US", false);
         Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US", false);
 
         var lexer = new Lexer(code);
-        Console.WriteLine("Tokenization done!");
-        PrintTokens(lexer);
+        if (verbose)
+        {
+            Console.WriteLine("Tokenization done!");
+            PrintTokens(lexer);
+        }
 
         var parser = new Parser(lexer);
         parser.Parse();
-        Console.WriteLine("Parsing done!");
-        PrintTree(parser);
+        if (verbose)
+        {
+            Console.WriteLine("Parsing done!");
+            PrintTree(parser);
+        }
 
         var typeCheckContext = Typecheck.TypecheckProgram(parser);
-        Console.WriteLine("Type checking done!");
+        if (verbose)Console.WriteLine("Type checking done!");
 
         var compiler = CodeGenerator.Generate(name, parser, typeCheckContext, path);
-        Console.WriteLine("Code generation done!");
+        if (verbose) Console.WriteLine("Code generation done!");
         return compiler;
     }
 

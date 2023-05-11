@@ -379,13 +379,13 @@ public class Visitskel
 
     public string? RecordTypeNodeVisitor(RecordTypeNode recordTypeNode, Context context)
     {
-        var childContext = new Context(context);
-        NodeContext[recordTypeNode] = childContext;
+        // var childContext = new Context(context);
+        NodeContext[recordTypeNode] = context;
 
         var type = "record ";
         foreach (var recordVarDeclNode in recordTypeNode.Members)
         {
-            var varType = VariableDeclVisitor(recordVarDeclNode, childContext);
+            var varType = VariableDeclVisitor(recordVarDeclNode, context);
             type += $"{varType} ";
         }
 

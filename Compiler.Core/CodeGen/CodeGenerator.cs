@@ -12,7 +12,7 @@ public static class CodeGenerator
         string? path = null)
     {
         var compiler = new CodeCompiler(programName, program, typecheckVisitor);
-        compiler.CompileToFile(path);
+        if (path != null) compiler.CompileToFile(path);
         return compiler;
     }
 }
